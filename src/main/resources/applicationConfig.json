@@ -1,0 +1,43 @@
+{
+	"nodeDetails": {
+		"serverDetails": [
+			{
+				"name" : "dc01",
+				"id" : 0,
+				"filePath" : "/tmp/pankaj/ragrawala/"
+			},
+			{
+				"name" : "dc02",
+				"id" : 1,
+				"filePath" : "/"
+			},
+			{
+				"name" : "dc03",
+				"id" : 2,
+				"filePath" : "/"
+			}
+		],
+		"clientDetails": [
+			{
+				"name" : "dc03",
+				"id" : 0
+			},
+			{
+				"name" : "dc03",
+				"id" : 1
+			},
+			{
+				"name" : "dc03",
+				"id" : 2
+			},
+			{
+				"name" : "dc03",
+				"id" : 3
+			},
+			{
+				"name" : "dc03",
+				"id" : 4
+			}
+		]
+	}
+}

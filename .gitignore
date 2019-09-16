@@ -1,0 +1,12 @@
+/target/
+
+# eclipse files
+.classpath
+.project
+.settings/
+
+# Log Files
+logfile/
+
+# Checkstyle
+.checkstyle
