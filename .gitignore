@@ -10,3 +10,6 @@ logfile/
 
 # Checkstyle
 .checkstyle
+
+# Dependency reduced pom
+dependency-reduced-pom.xml

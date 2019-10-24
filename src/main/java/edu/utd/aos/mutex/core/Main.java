@@ -6,6 +6,7 @@ import org.tinylog.Logger;
 import edu.utd.aos.mutex.dto.ApplicationConfig;
 import edu.utd.aos.mutex.dto.NodeDetails;
 import edu.utd.aos.mutex.dto.ServerDetails;
+import edu.utd.aos.mutex.exception.MutexException;
 import edu.utd.aos.mutex.references.MutexConfigHolder;
 import edu.utd.aos.mutex.references.MutexReferences;
 
@@ -14,7 +15,7 @@ public class Main {
 	public static void main(final String[] args) {
 		Logger.info("Hello World!");
 		try {
-			MutexConfigHolder.initialize();
+			initialize();
 		}catch(final Exception e) {
 			System.exit(MutexReferences.CONST_CODE_ERROR);
 		}
@@ -26,5 +27,9 @@ public class Main {
 			Logger.info("Name:" + server.getName());
 			Logger.info("ID:" + server.getId());
 		});
+	}
+	
+	public static void initialize() throws MutexException {
+		MutexConfigHolder.initialize();
 	}
 }
