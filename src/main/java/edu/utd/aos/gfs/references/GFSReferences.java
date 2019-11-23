@@ -1,4 +1,4 @@
-package edu.utd.aos.mutex.references;
+package edu.utd.aos.gfs.references;
 
 /**
  * Constants and references used across project.
@@ -6,12 +6,12 @@ package edu.utd.aos.mutex.references;
  * @author pankaj
  *
  */
-public class MutexReferences {
+public class GFSReferences {
 
 	/**
 	 * System Property that provides URI for the config.
 	 */
-	public static final String KEY_MUTEX_CONFIG = "mutex.config";
+	public static final String KEY_GFS_CONFIG = "gfs.config";
 	
 	/**
 	 * Exit code for errors and exception.
@@ -21,7 +21,7 @@ public class MutexReferences {
 	/**
 	 * Private constructor for utility class.
 	 */
-	private MutexReferences() {
+	private GFSReferences() {
 		
 	}
 }

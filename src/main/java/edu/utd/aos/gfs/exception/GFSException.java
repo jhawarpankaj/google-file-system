@@ -1,11 +1,11 @@
-package edu.utd.aos.mutex.exception;
+package edu.utd.aos.gfs.exception;
 
 /**
  * Custom Exception thrown by the framework.
  * 
  * @author pankaj
  */
-public class MutexException extends Exception{
+public class GFSException extends Exception{
 
 	/**
 	 * Default ID used in serialization.
@@ -15,7 +15,7 @@ public class MutexException extends Exception{
 	/**
 	 * Custom Exception thrown by the framework.
 	 */
-	public MutexException() {
+	public GFSException() {
 		super();
 	}
 	
@@ -25,7 +25,7 @@ public class MutexException extends Exception{
      * @param message
      *            Description of the exception.
      */
-	public MutexException(final String message) {
+	public GFSException(final String message) {
 		super(message);
 	}
 	
@@ -35,7 +35,7 @@ public class MutexException extends Exception{
      * @param throwable
      *            Root cause of the exception.
      */
-    public MutexException(final Throwable throwable) {
+    public GFSException(final Throwable throwable) {
         super(throwable);
     }
 
@@ -47,7 +47,7 @@ public class MutexException extends Exception{
      * @param throwable
      *            Root cause of the exception.
      */
-    public MutexException(final String message, final Throwable throwable) {
+    public GFSException(final String message, final Throwable throwable) {
         super(message, throwable);
     }
 

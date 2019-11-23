@@ -1,7 +1,7 @@
-package edu.utd.aos.mutex.references;
+package edu.utd.aos.gfs.references;
 
-import edu.utd.aos.mutex.dto.ApplicationConfig;
-import edu.utd.aos.mutex.exception.MutexException;
+import edu.utd.aos.gfs.dto.ApplicationConfig;
+import edu.utd.aos.gfs.exception.GFSException;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -15,7 +15,7 @@ import com.google.gson.Gson;
  * 
  * @author pankaj
  */
-public class MutexConfigHolder {
+public class GFSConfigHolder {
 	
 	/**
 	 * Reading configuration details.
@@ -25,17 +25,17 @@ public class MutexConfigHolder {
 	/**
 	 * Initialize all config files.
 	 * 
-	 * @throws MutexException
+	 * @throws GFSException
 	 */
-	public static void initialize() throws MutexException{
+	public static void initialize() throws GFSException{
 		Logger.info("Initializing application config file.");
-		final String configFile = System.getProperty(MutexReferences.KEY_MUTEX_CONFIG);
+		final String configFile = System.getProperty(GFSReferences.KEY_GFS_CONFIG);
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(configFile));
 			final Gson gson = new Gson();
 			applicationConfig = gson.fromJson(br, ApplicationConfig.class);
 		}catch(Exception e) {
-			throw new MutexException("Error while reading configuration file." + e);
+			throw new GFSException("Error while reading configuration file." + e);
 		}
 		
 	}
@@ -50,7 +50,7 @@ public class MutexConfigHolder {
 	/**
 	 * Constructor for utility class.
 	 */
-	private MutexConfigHolder() {
+	private GFSConfigHolder() {
 		
 	}
 }

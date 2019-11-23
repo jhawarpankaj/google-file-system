@@ -1,4 +1,4 @@
-package edu.utd.aos.mutex.dto;
+package edu.utd.aos.gfs.dto;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import lombok.Data;
  * @author pankaj
  */
 @Data
-public class ServerDetails {
+public class ClientServer {
 	
 	/**
 	 * Name of the server.
@@ -16,12 +16,8 @@ public class ServerDetails {
 	String name;
 	
 	/**
-	 * Id of the server.
+	 * Port of the server.
 	 */
-	int id;
+	int port;
 	
-	/**
-	 * Path of the file.
-	 */
-	String filePath;
 }

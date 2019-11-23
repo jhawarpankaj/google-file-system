@@ -1,4 +1,4 @@
-package edu.utd.aos.mutex.dto;
+package edu.utd.aos.gfs.dto;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +12,7 @@ import lombok.Setter;
 public class ApplicationConfig {
 	
 	/**
-	 * All server and client details.
+	 * All Meta, Client and Chunk server details.
 	 */
 	private NodeDetails nodeDetails;
 }
