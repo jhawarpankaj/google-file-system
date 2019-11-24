@@ -9,6 +9,11 @@ import lombok.Data;
  */
 @Data
 public class ChunkServer {
+		
+	/**
+	 * Unique id for each chunk server. 
+	 */
+	int id;
 	
 	/**
 	 * Name of the chunk server. 
@@ -19,4 +24,5 @@ public class ChunkServer {
 	 * Port of the chunk server.
 	 */
 	int port;
+	
 }

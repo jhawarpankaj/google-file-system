@@ -1,10 +1,10 @@
 {
 	"nodeDetails": {
-	
+		
 		"metaServer": {
 				"name" : "dc01.utdallas.edu",
 				"port": 5055,
-				"rootDir" : "/tmp/amtul-pankaj/gfs/"
+				"rootDir" : "files/meta/"
 			},
 			
 		"clientServer": [
@@ -18,27 +18,36 @@
 			}
 		],
 		
-		"chunkServer": [
-			{
-				"name" : "dc04.utdallas.edu",
-				"port" : 5058
-			},
-			{
-				"name" : "dc05.utdallas.edu",
-				"port" : 5059
-			},
-			{
-				"name" : "dc06.utdallas.edu",
-				"port" : 5060
-			},
-			{
-				"name" : "dc07.utdallas.edu",
-				"port" : 5061
-			},
-			{
-				"name" : "dc08.utdallas.edu",
-				"port" : 5062
-			}
-		]
+		"chunkServerDetails": {
+			"rootDir": "files/chunk/",
+			"nodes": [
+				{	
+					"id" : 1,
+					"name" : "dc04.utdallas.edu",
+					"port" : 5058					
+				},
+				{
+					"id" : 2,
+					"name" : "dc05.utdallas.edu",
+					"port" : 5059
+					
+				},
+				{
+					"id" : 3,
+					"name" : "dc06.utdallas.edu",
+					"port" : 5060
+				},
+				{
+					"id" : 4,
+					"name" : "dc07.utdallas.edu",
+					"port" : 5061
+				},
+				{
+					"id": 5,
+					"name" : "dc08.utdallas.edu",
+					"port" : 5062
+				}
+			]
+		}
 	}
 }

@@ -17,10 +17,14 @@ public class Sockets {
 	public static void intialize() throws GFSException, IOException {
 		Type type = LocalHost.getType();
 		switch(type) {
+		
 			case META:
+				// Infinite input listener socket.
 				Meta.start();
 				break;
+				
 			case CLIENT:
+				// Infinite command line socket.
 				new Thread(() -> {
 					try {
 						Client.openCommandLineSocket();
@@ -28,10 +32,29 @@ public class Sockets {
 						Logger.error("Error while initializing command line socket: " + e);
 					}
 				}).start();
+				
+				// Infinite input listener socket.
 				Client.start();
 				break;
+				
 			case CHUNK:
-				Chunk.start();
+				
+				// Infinite input listener socket.
+				new Thread(() -> {
+					try {
+						Chunk.start();
+					}catch(IOException | GFSException e) {
+						Logger.error("Error while initializing command line socket: " + e);
+					}					
+				}).start();
+				
+				// Adding this sleep temporarily to manually create the files on the 
+				// chunk server to test HEARTBEAT message until Amtul implements the create command.
+				
+				Helper.sleepForSec(10);				
+				
+				// Infinite HeartBeat. True Love!!
+				Chunk.sendHeartBeats();
 				break;
 			default:
 				throw new GFSException("Unidentified node type!");

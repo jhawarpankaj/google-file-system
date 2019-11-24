@@ -21,7 +21,6 @@ public class Main {
 		Logger.info("Hello World!");
 		try {
 			initialize();
-			setup();
 		}catch(final Exception e) {
 			Logger.error("Exiting, error: " + e);
 			System.exit(GFSReferences.CONST_CODE_ERROR);
@@ -30,13 +29,14 @@ public class Main {
 		ApplicationConfig applicationConfig = GFSConfigHolder.getApplicationConfig();
 		NodeDetails nodeDetails = applicationConfig.getNodeDetails();
 		MetaServer metaServer = nodeDetails.getMetaServer();
-		List<ChunkServer> chunkServer = nodeDetails.getChunkServer();
+		List<ChunkServer> chunkServer = nodeDetails.getChunkServerDetails().getNodes();
 		List<ClientServer> clientServer = nodeDetails.getClientServer();		
 	}
 
 	private static void initialize() throws GFSException {
 		GFSConfigHolder.initialize();
-		LocalHost.initialize();
+		LocalHost.initializeNodeDetails();
+		LocalHost.initializeNodeDir();
 		try {
 			Sockets.intialize();
 		} catch (IOException e) {

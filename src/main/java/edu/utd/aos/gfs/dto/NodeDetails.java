@@ -25,5 +25,5 @@ public class NodeDetails {
 	/**
 	 * Chunk Server Details.
 	 */
-	List<ChunkServer> chunkServer;
+	ChunkServerDetails chunkServerDetails;
 }
