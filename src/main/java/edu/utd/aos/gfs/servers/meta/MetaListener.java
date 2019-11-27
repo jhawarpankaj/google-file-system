@@ -7,6 +7,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.tinylog.Logger;
 
+import com.google.gson.JsonObject;
+
 import edu.utd.aos.gfs.exception.GFSException;
 import edu.utd.aos.gfs.references.GFSReferences;
 import edu.utd.aos.gfs.utils.Helper;
@@ -35,20 +37,24 @@ public class MetaListener extends Thread {
 			String command = Helper.getCommand(received);
 			switch (command) {
 
-			case GFSReferences.HEARTBEAT:
-				String message = Helper.getMessage(received);
-				// Logger.info("Received heartbeat, not doing anything for now");
-				// JsonObject heartbeatJson = Helper.getParsedHeartBeat(message);
-				// Logger.debug("Parsed heart beat message: " + heartbeatJson); // TODO
-				// Helper.iterateHeartBeat(server, heartbeatJson);
-				break;
-
-			case GFSReferences.CREATE_ACK:
-				MetaHelperCreate.handleCreateAck(server, mimpl);
-				break;
-
-			default:
-				throw new GFSException("Unidentified input: " + command + " received on META server!!");
+				case GFSReferences.HEARTBEAT:
+					lock.lock();
+					String message = Helper.getMessage(received);
+					Logger.debug("Received heartbeat: " + message);
+					JsonObject heartbeatJson = Helper.getParsedHeartBeat(message);
+					Logger.debug("Json Parsed heart beat message: " + heartbeatJson); // TODO
+//					Helper.iterateHeartBeat(server, heartbeatJson);
+					MetaHelperHeartbeat.updateHeartBeat(server, heartbeatJson);
+					Logger.debug(MetaHelperHeartbeat.metaMap);
+					lock.unlock();
+					break;
+	
+				case GFSReferences.CREATE_ACK:
+					MetaHelperCreate.handleCreateAck(server, mimpl);
+					break;
+	
+				default:
+					throw new GFSException("Unidentified input: " + command + " received on META server!!");
 			}
 
 		} catch (Exception e) {

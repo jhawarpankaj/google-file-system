@@ -105,7 +105,7 @@ public class Chunk {
 			for(File chunk: allChunks) {
 				JsonArray jArr = new JsonArray();
 				String chunkName = chunk.getName();
-				if(chunkName.endsWith("version")) continue;
+				if(chunkName.endsWith(".version")) continue;
 				String size = String.valueOf(chunk.length());
 				File versionFile = new File(rootDir + fileName + "/" + chunkName + ".version");
 				BufferedReader buff = new BufferedReader(new FileReader(versionFile));

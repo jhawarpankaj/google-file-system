@@ -18,6 +18,13 @@ public class CommonTests {
 //		stringIndex();
 //		Integer a = null;
 //		a++;
+		String s = "rtrt,ddd,ddsd,";
+		String[] split = s.split(",");
+		System.out.println(split.length);
+		for(int i = 0; i < split.length; i++) {
+			System.out.println(split[i]);
+		}
+		
 	}
 
 	private static void stringIndex() {

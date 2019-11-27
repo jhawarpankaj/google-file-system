@@ -89,6 +89,13 @@ public class Helper {
 
 		for (Entry<String, JsonElement> entry : heartbeatJson.entrySet()) {
 			String filename = entry.getKey();
+			JsonObject chunkjObj = entry.getValue().getAsJsonObject();
+			for(Entry<String, JsonElement> chunk: chunkjObj.entrySet()) {
+				String chunkName = chunk.getKey();
+				JsonArray sizeAndVersion = chunk.getValue().getAsJsonArray();
+				String size = sizeAndVersion.get(0).getAsString();
+				String version = sizeAndVersion.get(1).getAsString();
+			}
 			List<String> allChunks = new ArrayList<String>();
 			JsonArray chunknames = entry.getValue().getAsJsonArray();
 			for (JsonElement chunk : chunknames) {
