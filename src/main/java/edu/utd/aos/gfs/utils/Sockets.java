@@ -55,7 +55,7 @@ public class Sockets {
 			Helper.sleepForSec(10);
 
 			// Infinite HeartBeat. True Love!! Or perhaps closer to death o.O
-			Chunk.sendHeartBeats();
+			Chunk.sendInfiniteHeartBeats();
 			break;
 		default:
 			throw new GFSException("Unidentified node type!");

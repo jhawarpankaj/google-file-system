@@ -1,5 +1,8 @@
 package edu.utd.aos.gfs.references;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 /**
  * Constants and references used across project.
  * 
@@ -27,6 +30,11 @@ public class GFSReferences {
 	 * Command used by Client to create a new file.
 	 */
 	public static final String CREATE = "CREATE";
+	
+	/**
+	 * Used by chunk server to send an acknowledgement after creating a new chunk.
+	 */
+	public static final String CREATE_ACK = "CREATE_ACK";
 
 	/**
 	 * Command used by client to read a file.
@@ -72,7 +80,7 @@ public class GFSReferences {
 	 */
 	public static final String NEW_LINE = "\n";
 	/**
-	 * Chunk Name Prefix
+	 * Chunk Name Prefix. An integer to be appended to denote unique chunk number.
 	 */
 	public static final String CHUNK_PREFIX = "chunk";
 	/**
@@ -80,17 +88,25 @@ public class GFSReferences {
 	 */
 	public static final String TOTAL_CHUNKS = "TotalChunks";
 
-	/**
+	/**>>>>>>> Pankaj's create command for chunk servers
 	 * Chunk Size
 	 */
 	public static final int CHUNK_SIZE = 4096;
-	/// NOV 26 AMTUL
+
+	/**
+	 * Success resposne for client.
+	 */
 	public static final String CREATE_SUC = "CREATE_SUCCESS";
-	public static final String CREATE_ACK = "CREATE_ACK";
+		
+	/**
+	 * Constant encoding to be used.
+	 */
+	public static final Charset ENCODING = StandardCharsets.UTF_8;	
 
 	/**
 	 * Private constructor for utility class.
 	 */
+	
 	private GFSReferences() {
 
 	}

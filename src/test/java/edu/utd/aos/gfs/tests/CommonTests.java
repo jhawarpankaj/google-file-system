@@ -13,8 +13,15 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 public class CommonTests {
 
 	public static void main(String[] args) {
-		list();
+//		list();
 //		file();
+		stringIndex();
+	}
+
+	private static void stringIndex() {
+		String s = "chunk1";
+		System.out.println(s.substring(s.length() - 1));
+		
 	}
 
 	private static void list() {
