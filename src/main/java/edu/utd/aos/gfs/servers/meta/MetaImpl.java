@@ -13,11 +13,14 @@ public class MetaImpl {
 	ArrayList<MetaQueue> queuedRequest;
 	Integer createSentCounter;
 	boolean createSentFlag;
+	Integer padSentCounter;
+	boolean padSentFlag;
 
 	public MetaImpl() {
 		super();
 		this.queuedRequest = new ArrayList<MetaQueue>();
 		this.createSentCounter = 0;
+		this.padSentCounter = 0;
 	}
 
 	public synchronized ArrayList<MetaQueue> getQueuedRequest() {
@@ -44,12 +47,36 @@ public class MetaImpl {
 		this.createSentFlag = createSentFlag;
 	}
 
+	public Integer getPadSentCounter() {
+		return padSentCounter;
+	}
+
+	public synchronized void setPadSentCounter(Integer padSentCounter) {
+		this.padSentCounter = padSentCounter;
+	}
+
+	public boolean isPadSentFlag() {
+		return padSentFlag;
+	}
+
+	public synchronized void setPadSentFlag(boolean padSentFlag) {
+		this.padSentFlag = padSentFlag;
+	}
+
 	public synchronized void decCreateSentCounter() {
 		this.createSentCounter--;
 	}
 
 	public void incCreateSentCounter() {
 		this.createSentCounter++;
+	}
+
+	public synchronized void decPadSentCounter() {
+		this.padSentCounter--;
+	}
+
+	public void incPadSentCounter() {
+		this.padSentCounter++;
 	}
 
 	/**

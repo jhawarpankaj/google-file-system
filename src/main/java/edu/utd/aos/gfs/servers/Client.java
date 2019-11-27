@@ -41,8 +41,8 @@ public class Client {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 			String input = reader.readLine();
 			String requestTS = Helper.getTimestamp().toString();
-			String message = input + GFSReferences.SEND_SEPARATOR + requestTS;
-			Sockets.sendMessage(LocalHost.getName(), LocalHost.getPort(), message);
+			input = input + GFSReferences.SEND_SEPARATOR + requestTS;
+			Sockets.sendMessage(LocalHost.getName(), LocalHost.getPort(), input);
 		}
 
 	}

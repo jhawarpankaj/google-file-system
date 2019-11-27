@@ -35,19 +35,23 @@ public class ClientListener extends Thread {
 			String sender = this.worker.getInetAddress().getHostName();
 			String owner = this.owner.getInetAddress().getLocalHost().getHostName();
 			if (owner.equalsIgnoreCase(sender)) {
-				Logger.info("Forwarding the terminal input to Meta Server");
+				Logger.info("Forwarding to Meta Server:" + received);
 				Sockets.sendMessage(Nodes.metaServerName(), Nodes.metaServerPort(), received);
 			} else {
 				String command = Helper.getCommand(received);
 				switch (command) {
 				case GFSReferences.READ:
-					Logger.info("Received READ details from Meta");
+					Logger.info("Received READ from Meta");
 					ClientHelper.forwardReadToChunk(received);
 					break;
 				case GFSReferences.APPEND:
+					Logger.info("Received APPEND from Meta");
 					break;
 				case GFSReferences.CREATE_SUC:
-					ClientHelper.handleCreateSuc(command);
+					ClientHelper.handleCreateResponse(command);
+					break;
+				case GFSReferences.READ_CONTENT:
+					ClientHelper.handleReadResponse(command);
 					break;
 				default:
 					throw new GFSException("Unidentified input: " + command + " received on CLIENT server!!");

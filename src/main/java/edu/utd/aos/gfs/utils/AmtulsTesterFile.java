@@ -6,10 +6,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.tinylog.Logger;
-
-import com.google.gson.JsonObject;
 
 import edu.utd.aos.gfs.dto.ChunkServer;
 import edu.utd.aos.gfs.references.GFSReferences;
@@ -29,9 +28,34 @@ public class AmtulsTesterFile {
 	public static List<List<ChunkServer>> chunkServerCombos = new ArrayList<List<ChunkServer>>();
 
 	public static void main(String[] args) {
-		String message = "{\"file1\":{\"chunk1\":{[1, 223]},\"chunk2\":{[0, 123]}},\"file2\":{\"chunk1\":{[3, 2232]},\"chunk3\":{[3, 2232]}}}";
-		JsonObject heartbeatJson = Helper.getParsedHeartBeat(message);
-		Helper.iterateHeartBeat("", heartbeatJson);
+		// String message = "{\"file1\":{\"chunk1\":{[1, 223]},\"chunk2\":{[0,
+		// 123]}},\"file2\":{\"chunk1\":{[3, 2232]},\"chunk3\":{[3, 2232]}}}";
+		// JsonObject heartbeatJson = Helper.getParsedHeartBeat(message);
+		// Helper.iterateHeartBeat("", heartbeatJson);
+		// generateRandomWord();
+		String input = "APPEND||file1||28";
+		String requestTS = Helper.getTimestamp().toString();
+		String message = "";
+		String command = Helper.getCommand(input);
+		if (GFSReferences.APPEND.equalsIgnoreCase(command)) {
+			String randomContent = generateRandomWord();
+			input = input + GFSReferences.SEND_SEPARATOR + randomContent;
+		}
+		message = input + GFSReferences.SEND_SEPARATOR + requestTS;
+		System.out.println(message);
+	}
+
+	public static String generateRandomWord() {
+		String randomString = "";
+		Random random = new Random();
+
+		char[] word = new char[random.nextInt(8) + 3];
+		for (int j = 0; j < word.length; j++) {
+			word[j] = (char) ('a' + random.nextInt(26));
+		}
+		randomString = new String(word);
+		System.out.println(randomString);
+		return randomString;
 	}
 
 	static void combinationUtil(int arr[], int data[], int start, int end, int index, int r) {

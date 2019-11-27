@@ -30,7 +30,7 @@ public class GFSReferences {
 	 * Command used by Client to create a new file.
 	 */
 	public static final String CREATE = "CREATE";
-	
+
 	/**
 	 * Used by chunk server to send an acknowledgement after creating a new chunk.
 	 */
@@ -88,8 +88,8 @@ public class GFSReferences {
 	 */
 	public static final String TOTAL_CHUNKS = "TotalChunks";
 
-	/**>>>>>>> Pankaj's create command for chunk servers
-	 * Chunk Size
+	/**
+	 * >>>>>>> Pankaj's create command for chunk servers Chunk Size
 	 */
 	public static final int CHUNK_SIZE = 4096;
 
@@ -97,16 +97,25 @@ public class GFSReferences {
 	 * Success resposne for client.
 	 */
 	public static final String CREATE_SUC = "CREATE_SUCCESS";
-		
+	/*
+	 * READ response chunk to client.
+	 */
+	public static final String READ_CONTENT = "CONTENT";
+
 	/**
 	 * Constant encoding to be used.
 	 */
-	public static final Charset ENCODING = StandardCharsets.UTF_8;	
+	public static final Charset ENCODING = StandardCharsets.UTF_8;
+
+	/**
+	 * Pad wit Null to chunks
+	 */
+	public static final String PAD_NULL = "PAD_NULL";
 
 	/**
 	 * Private constructor for utility class.
 	 */
-	
+
 	private GFSReferences() {
 
 	}

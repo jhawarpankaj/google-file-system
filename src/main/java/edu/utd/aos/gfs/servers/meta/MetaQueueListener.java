@@ -44,18 +44,23 @@ public class MetaQueueListener extends Thread {
 						mimpl.deleteFromDeferredQueue();
 						break;
 
-					/*
-					 * case GFSReferences.READ: String fileToRead = Helper.getMessage(received);
-					 * String offset = Helper.getParamThree(received); List<String> chunkDetails =
-					 * MetaHelperRead.computeChunkFromOffset(offset); String chunkServersList =
-					 * MetaHelperRead.getChunkServersToRead(fileToRead, chunkDetails.get(0)); String
-					 * response = MetaHelperRead.generateReadResponse(fileToRead, chunkDetails,
-					 * chunkServersList); MetaHelperRead.forwardReadToClient(response, server);
-					 * break;
-					 * 
-					 * case GFSReferences.APPEND: String fileToAppend = Helper.getMessage(received);
-					 * String appendContent = Helper.getParamThree(received); break;
-					 */
+					case GFSReferences.READ:
+						Logger.info("Received READ from " + ci.getHostname());
+						String fileToRead = Helper.getMessage(message);
+						String offset = Helper.getParamThree(message);
+						List<String> chunkDetails = MetaHelperRead.computeChunkFromOffset(offset);
+						String chunkServersList = MetaHelperRead.getChunkServersToRead(fileToRead, chunkDetails.get(0));
+						String response = MetaHelperRead.generateReadMsgForClient(fileToRead, chunkDetails,
+								chunkServersList);
+						MetaHelperRead.forwardReadToClient(response, message);
+						break;
+
+					case GFSReferences.APPEND:
+						// String fileToAppend = Helper.getMessage(message);
+						// String appendContent = Helper.getParamThree(message);
+						MetaHelperAppend.appendOrCreate(message, ci.getHostname(), mimpl);
+
+						break;
 
 					default:
 						throw new GFSException("Unidentified input: " + command + " received on META server!!");
