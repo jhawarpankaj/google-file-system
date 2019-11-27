@@ -6,6 +6,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 
@@ -78,6 +80,31 @@ public class ChunkHelper {
 	 */
 	private ChunkHelper() {
 		
+	}
+
+	/**
+	 * Parse read command.
+	 * @param received
+	 * @return
+	 */
+	public static Map<String, String> parseRead(String received) {
+		String[] readDetails = received.split(GFSReferences.REC_SEPARATOR);
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("filename", readDetails[1]);
+		map.put("chunkname", readDetails[2]);
+		map.put("offset", readDetails[3]);
+		return map;
+	}
+
+	/**
+	 * Parsed content message for READ response.
+	 * @param filename Name of the file.
+	 * @param content Content of the file.
+	 * @return Formatted content message for the client.
+	 */
+	public static String prepareContentMessage(String filename, String content) {
+		return GFSReferences.CONTENT + GFSReferences.SEND_SEPARATOR 
+				+ filename + content;		
 	}
 
 	

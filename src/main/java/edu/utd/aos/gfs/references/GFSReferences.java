@@ -40,6 +40,11 @@ public class GFSReferences {
 	 * Command used by client to read a file.
 	 */
 	public static final String READ = "READ";
+	
+	/**
+	 * Used by chunk while sending content for read command.
+	 */
+	public static final String CONTENT = "CONTENT";
 
 	/**
 	 * Command used by client to append to a file.
@@ -89,7 +94,7 @@ public class GFSReferences {
 	public static final String TOTAL_CHUNKS = "TotalChunks";
 
 	/**
-	 * >>>>>>> Pankaj's create command for chunk servers Chunk Size
+	 * Chunk size.
 	 */
 	public static final int CHUNK_SIZE = 4096;
 
@@ -105,6 +110,7 @@ public class GFSReferences {
 	/**
 	 * Constant encoding to be used.
 	 */
+
 	public static final Charset ENCODING = StandardCharsets.UTF_8;
 
 	/**
@@ -113,9 +119,14 @@ public class GFSReferences {
 	public static final String PAD_NULL = "PAD_NULL";
 
 	/**
-	 * Private constructor for utility class.
+	 * Path separator for linux file system.
 	 */
+	public static final String PATHSEPARATOR = "/";
 
+	/**
+	 * Private constructor for utility class.
+	 */	
+	
 	private GFSReferences() {
 
 	}
