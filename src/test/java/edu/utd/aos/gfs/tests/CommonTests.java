@@ -15,7 +15,9 @@ public class CommonTests {
 	public static void main(String[] args) {
 //		list();
 //		file();
-		stringIndex();
+//		stringIndex();
+//		Integer a = null;
+//		a++;
 	}
 
 	private static void stringIndex() {

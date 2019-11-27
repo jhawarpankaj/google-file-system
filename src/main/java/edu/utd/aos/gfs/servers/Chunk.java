@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.tinylog.Logger;
 
 import com.google.gson.JsonArray;
@@ -104,6 +105,7 @@ public class Chunk {
 			for(File chunk: allChunks) {
 				JsonArray jArr = new JsonArray();
 				String chunkName = chunk.getName();
+				if(chunkName.endsWith("version")) continue;
 				String size = String.valueOf(chunk.length());
 				File versionFile = new File(rootDir + fileName + "/" + chunkName + ".version");
 				BufferedReader buff = new BufferedReader(new FileReader(versionFile));

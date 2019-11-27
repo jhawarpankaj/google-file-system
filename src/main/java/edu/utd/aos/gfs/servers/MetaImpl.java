@@ -16,6 +16,7 @@ public class MetaImpl {
 	public MetaImpl() {
 		super();
 		this.queuedRequest = new ArrayList<MetaQueue>();
+		this.createSentCounter = 0;
 	}
 
 	public ArrayList<MetaQueue> getQueuedRequest() {

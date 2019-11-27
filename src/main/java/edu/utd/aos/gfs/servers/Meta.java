@@ -24,6 +24,7 @@ public class Meta {
 				receiverSocket = serverSocket.accept();
 				DataInputStream dis = new DataInputStream(receiverSocket.getInputStream());
 				DataOutputStream dos = new DataOutputStream(receiverSocket.getOutputStream());
+				// queue to store all incoming request.
 				Thread t = new MetaListener(receiverSocket, dis, dos, mimpl);
 				t.start();
 			}
