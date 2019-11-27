@@ -1,6 +1,8 @@
 package edu.utd.aos.gfs.utils;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -105,6 +107,48 @@ public class Helper {
 	 */
 	public static String getChunkName(String chunkServername) {
 		return chunkServername.split("\\.")[0];
+	}
+
+/////////AMTUL CHANGE 26 NOVEMBER
+	/**
+	 * @return Current Timestamp of the node
+	 */
+	public static Timestamp getTimestamp() {
+		return new Timestamp(new Date().getTime());
+	}
+
+	/**
+	 * Compare timestamps from request
+	 * 
+	 * @param t1
+	 * @param t2
+	 * @param print
+	 * @return
+	 */
+	public static int compareTimestamp(Timestamp t1, Timestamp t2, boolean print) {
+		if (t1 == null && t2 == null)
+			return 0;
+		if (t1 != null && t2 == null)
+			return -1;
+
+		int c = 0;
+		if (t1.after(t2)) {
+			c = 1;
+		} else if (t1.before(t2)) {
+			c = -1;
+		} else if (t1.equals(t2)) {
+			c = 0;
+		}
+		return c;
+	}
+
+	public static boolean isQueueableMessage(String command) {
+		if (GFSReferences.CREATE.equalsIgnoreCase(command) || GFSReferences.READ.equalsIgnoreCase(command)
+				|| GFSReferences.READ.equalsIgnoreCase(command))
+			return true;
+		else
+			return false;
+
 	}
 
 	/**

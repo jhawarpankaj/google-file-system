@@ -18,17 +18,18 @@ public class Meta {
 		ServerSocket serverSocket = null;
 		try {
 			serverSocket = new ServerSocket(LocalHost.getPort());
-			while(true) {
+			MetaImpl mimpl = new MetaImpl();
+			while (true) {
 				Socket receiverSocket = null;
 				receiverSocket = serverSocket.accept();
 				DataInputStream dis = new DataInputStream(receiverSocket.getInputStream());
 				DataOutputStream dos = new DataOutputStream(receiverSocket.getOutputStream());
-	            Thread t = new MetaListener(receiverSocket, dis, dos);
-	            t.start();
+				Thread t = new MetaListener(receiverSocket, dis, dos, mimpl);
+				t.start();
 			}
-		}catch(Exception e) {
+		} catch (Exception e) {
 			serverSocket.close();
 			throw new GFSException("Error while receiving message:" + e);
-		}		
+		}
 	}
 }

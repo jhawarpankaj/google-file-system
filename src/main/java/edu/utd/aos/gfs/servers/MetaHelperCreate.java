@@ -52,15 +52,33 @@ public class MetaHelperCreate {
 		}
 	}
 
-	public static void forwardCreationToChunks(List<ChunkServer> chunkServers, String fileName) {
+	public static void forwardCreationToChunks(List<ChunkServer> chunkServers, String fileName, MetaImpl mimpl) {
 		String message = GFSReferences.CREATE + GFSReferences.SEND_SEPARATOR;
-		message += fileName + GFSReferences.SEND_SEPARATOR;
-		message += GFSReferences.CHUNK_PREFIX + 1;
+		message += fileName;// + GFSReferences.SEND_SEPARATOR;
+		// message += GFSReferences.CHUNK_PREFIX + 1;
+		mimpl.setCreateSentFlag(true);
 		for (ChunkServer chunk : chunkServers) {
 			Sockets.sendMessage(chunk.getName(), chunk.getPort(), message);
-			Logger.info("Forward CREATE to ChunkServer-" + chunk.getName());
-			Logger.info("Message:" + message);
+			Logger.info("Forwarded " + message + " CREATE to ChunkServer-" + chunk.getName());
+			mimpl.incCreateSentCounter();
+			// Logger.info("Message:" + message);
 		}
+	}
+
+	public static void waitForChunkServerAck(MetaImpl mimpl) {
+		while (mimpl.isCreateSentFlag() && mimpl.getCreateSentCounter() > 0) {
+			Logger.info("Waiting for CREATE_ACK from the Chunk Servers");
+		}
+		Logger.info("Received all CREATE_ACKS.");
+	}
+
+	public static void sendCreateSuccessClient(String server, String filename) {
+		Logger.info("Creation completed, sending Acknowledgement to Client");
+		String message = GFSReferences.CREATE_SUC + GFSReferences.SEND_SEPARATOR + filename;
+		int port = Nodes.getPortByHostName(server);
+		Sockets.sendMessage(server, port, message);
+		Logger.info(message + " sent to " + server);
+
 	}
 
 	private static void randomServer(List<ChunkServer> arr, List<ChunkServer> data, int start, int end, int index,
@@ -82,6 +100,23 @@ public class MetaHelperCreate {
 		List<ChunkServer> arr = Nodes.chunkServersList();
 		List<ChunkServer> data = new ArrayList<ChunkServer>(3);
 		randomServer(arr, data, 0, 4, 0, 3);
+	}
+
+	public static String getFileName(String message) {
+		return message.split(GFSReferences.REC_SEPARATOR)[1];
+	}
+
+	public static String getRequestTimestamp(String message) {
+		return message.split(GFSReferences.REC_SEPARATOR)[2];
+	}
+
+	public static void handleCreateAck(String server, MetaImpl mimpl) {
+		Logger.info("Received CREATE_ACK from " + server + " Reducing the counter.");
+		mimpl.decCreateSentCounter();
+		if (mimpl.getCreateSentCounter() == 0) {
+			mimpl.setCreateSentFlag(false);
+			Logger.info("Received all CREATE_ACKS");
+		}
 	}
 
 }

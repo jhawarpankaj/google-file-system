@@ -84,6 +84,9 @@ public class GFSReferences {
 	 * Chunk Size
 	 */
 	public static final int CHUNK_SIZE = 4096;
+	/// NOV 26 AMTUL
+	public static final String CREATE_SUC = "CREATE_SUCCESS";
+	public static final String CREATE_ACK = "CREATE_ACK";
 
 	/**
 	 * Private constructor for utility class.

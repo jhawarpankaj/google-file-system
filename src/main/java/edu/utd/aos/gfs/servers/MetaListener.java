@@ -8,8 +8,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.tinylog.Logger;
 
-import com.google.gson.JsonObject;
-
 import edu.utd.aos.gfs.dto.ChunkServer;
 import edu.utd.aos.gfs.exception.GFSException;
 import edu.utd.aos.gfs.references.GFSReferences;
@@ -19,12 +17,14 @@ public class MetaListener extends Thread {
 	final Socket worker;
 	final DataInputStream dis;
 	final DataOutputStream dos;
+	MetaImpl mimpl;
 	public static final ReentrantLock lock = new ReentrantLock();
 
-	public MetaListener(Socket worker, DataInputStream dis, DataOutputStream dos) {
+	public MetaListener(Socket worker, DataInputStream dis, DataOutputStream dos, MetaImpl mimpl) {
 		this.worker = worker;
 		this.dis = dis;
 		this.dos = dos;
+		this.mimpl = mimpl;
 	}
 
 	@Override
@@ -35,24 +35,36 @@ public class MetaListener extends Thread {
 			// server from which the message has come.
 			String server = this.worker.getInetAddress().getHostName();
 
-			Logger.debug("Received message: " + received);
-
+			Logger.info("Received message: " + received);
+			Logger.info("Adding it to the PriorityQueue, queue size:" + mimpl.getQueuedRequest().size());
 			String command = Helper.getCommand(received);
-
+			if (Helper.isQueueableMessage(command)) {
+				mimpl.addToDeferredQueue(received);// LOGIC TODO
+				received = mimpl.chooseFromDeferredQueue();
+				command = Helper.getCommand(received);
+			} else
+				Logger.info("Message is not  a Queueable Message, beginning to process");
 			switch (command) {
 
 			case GFSReferences.HEARTBEAT:
 				String message = Helper.getMessage(received);
-				JsonObject heartbeatJson = Helper.getParsedHeartBeat(message);
-				Logger.debug("Parsed heart beat message: " + heartbeatJson); // TODO
-				Helper.iterateHeartBeat(server, heartbeatJson);
+				Logger.info("Received heartbeat, not doing anything for now");
+				// JsonObject heartbeatJson = Helper.getParsedHeartBeat(message);
+				// Logger.debug("Parsed heart beat message: " + heartbeatJson); // TODO
+				// Helper.iterateHeartBeat(server, heartbeatJson);
 				break;
 
 			case GFSReferences.CREATE:
-				String fileToCreate = Helper.getMessage(received);
+				Logger.info("Received CREATE from " + server);
+				String fileToCreate = MetaHelperCreate.getFileName(received);
 				List<ChunkServer> chunkServers = MetaHelperCreate.get_3RandomChunkServers();
-				MetaHelperCreate.initMetaFile(fileToCreate, chunkServers);
-				MetaHelperCreate.forwardCreationToChunks(chunkServers, fileToCreate);
+				// MetaHelperCreate.initMetaFile(fileToCreate, chunkServers);// TODO
+				MetaHelperCreate.forwardCreationToChunks(chunkServers, fileToCreate, mimpl);
+				MetaHelperCreate.waitForChunkServerAck(mimpl);
+				MetaHelperCreate.sendCreateSuccessClient(server, fileToCreate);// TODO PICK NEXT?
+				break;
+			case GFSReferences.CREATE_ACK:
+				MetaHelperCreate.handleCreateAck(server, mimpl);
 				break;
 
 			case GFSReferences.READ:

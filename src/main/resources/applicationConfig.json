@@ -9,10 +9,12 @@
 			
 		"clientServer": [
 			{
+				"id" : 1,
 				"name" : "dc02.utdallas.edu",
 				"port" : 5056
 			},
 			{
+				"id" : 2,
 				"name" : "dc03.utdallas.edu",
 				"port" : 5057
 			}

@@ -47,6 +47,9 @@ public class ClientListener extends Thread {
 					break;
 				case GFSReferences.APPEND:
 					break;
+				case GFSReferences.CREATE_SUC:
+					ClientHelper.handleCreateSuc(command);
+					break;
 				default:
 					throw new GFSException("Unidentified input: " + command + " received on CLIENT server!!");
 				}

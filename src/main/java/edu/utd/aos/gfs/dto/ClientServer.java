@@ -9,15 +9,19 @@ import lombok.Data;
  */
 @Data
 public class ClientServer {
-	
+
 	/**
 	 * Name of the server.
 	 */
 	String name;
-	
+
 	/**
 	 * Port of the server.
 	 */
 	int port;
-	
+	/**
+	 * ID of the server
+	 */
+	int id;
+
 }

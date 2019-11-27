@@ -68,4 +68,18 @@ public class Nodes {
 		}
 		return port;
 	}
+
+	/////// AMTUL 26NOV
+	public static int getClientIDByHostName(String hostname) {
+		int id = -1;
+
+		List<ClientServer> clients = clientServersList();
+		for (ClientServer client : clients) {
+			if (client.getName().equalsIgnoreCase(hostname)) {
+				id = client.getId();
+				return id;
+			}
+		}
+		return id;
+	}
 }

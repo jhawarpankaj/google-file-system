@@ -26,4 +26,10 @@ public class ClientHelper {
 		Logger.info("Message sent:" + message);
 	}
 
+	public static void handleCreateSuc(String command) {
+		String filename = command.split(GFSReferences.REC_SEPARATOR)[1];
+		Logger.info("Received CREATE_SUC from MetaServer for file:" + filename);
+		// TODO-Display on terminal
+	}
+
 }
