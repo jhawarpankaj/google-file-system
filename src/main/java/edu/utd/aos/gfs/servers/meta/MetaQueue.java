@@ -1,4 +1,4 @@
-package edu.utd.aos.gfs.servers;
+package edu.utd.aos.gfs.servers.meta;
 
 import java.sql.Timestamp;
 import java.util.Comparator;
@@ -9,9 +9,9 @@ import edu.utd.aos.gfs.utils.Helper;
  * Class object for Meta Deferred Request object
  */
 public class MetaQueue implements Comparable<MetaQueue> {
-	private int clientNum;
 	private Timestamp timestamp;
 	private String message;
+	private ClientInfo client;
 
 	/**
 	 * Constructor for creating a Quorum Deferred Request object
@@ -19,19 +19,11 @@ public class MetaQueue implements Comparable<MetaQueue> {
 	 * @param clientNum: clientNum of the deferred reply
 	 * @param timestamp: timestamp of the request before it had been deferred
 	 */
-	public MetaQueue(int clientNum, Timestamp timestamp, String message) {
+	public MetaQueue(Timestamp timestamp, String message, ClientInfo client) {
 		super();
-		this.clientNum = clientNum;
 		this.timestamp = timestamp;
 		this.message = message;
-	}
-
-	public int getProcessNum() {
-		return clientNum;
-	}
-
-	public void setProcessNum(int processNum) {
-		this.clientNum = processNum;
+		this.client = client;
 	}
 
 	public Timestamp getTimestamp() {
@@ -50,9 +42,17 @@ public class MetaQueue implements Comparable<MetaQueue> {
 		this.message = message;
 	}
 
+	public ClientInfo getClient() {
+		return client;
+	}
+
+	public void setClient(ClientInfo client) {
+		this.client = client;
+	}
+
 	@Override
 	public int compareTo(MetaQueue o) {
-		return this.clientNum - o.getProcessNum();
+		return this.client.getClientId() - o.client.getClientId();
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class MetaQueue implements Comparable<MetaQueue> {
 		public int compare(MetaQueue o1, MetaQueue o2) {
 			int c = Helper.compareTimestamp(o1.getTimestamp(), o2.getTimestamp(), false);
 			if (c == 0)
-				c = o1.getProcessNum() - o2.getProcessNum();
+				c = o1.client.getClientId() - o2.client.getClientId();
 			return c;
 		}
 

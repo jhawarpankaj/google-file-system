@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.tinylog.Logger;
 
+import com.google.gson.JsonObject;
+
 import edu.utd.aos.gfs.dto.ChunkServer;
 import edu.utd.aos.gfs.references.GFSReferences;
 
@@ -27,9 +29,9 @@ public class AmtulsTesterFile {
 	public static List<List<ChunkServer>> chunkServerCombos = new ArrayList<List<ChunkServer>>();
 
 	public static void main(String[] args) {
-		populateChunkServerCombos();
-		for (List str : chunkServerCombos)
-			System.out.println(str.get(0) + "," + str.get(1) + "," + str.get(2));
+		String message = "{\"file1\":{\"chunk1\":{[1, 223]},\"chunk2\":{[0, 123]}},\"file2\":{\"chunk1\":{[3, 2232]},\"chunk3\":{[3, 2232]}}}";
+		JsonObject heartbeatJson = Helper.getParsedHeartBeat(message);
+		Helper.iterateHeartBeat("", heartbeatJson);
 	}
 
 	static void combinationUtil(int arr[], int data[], int start, int end, int index, int r) {

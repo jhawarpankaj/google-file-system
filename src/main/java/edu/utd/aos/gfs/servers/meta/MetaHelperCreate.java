@@ -1,4 +1,4 @@
-package edu.utd.aos.gfs.servers;
+package edu.utd.aos.gfs.servers.meta;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -54,20 +54,22 @@ public class MetaHelperCreate {
 
 	public static void forwardCreationToChunks(List<ChunkServer> chunkServers, String fileName, MetaImpl mimpl) {
 		String message = GFSReferences.CREATE + GFSReferences.SEND_SEPARATOR;
-		message += fileName;// + GFSReferences.SEND_SEPARATOR;
-		// message += GFSReferences.CHUNK_PREFIX + 1;
+		message += fileName;
 		mimpl.setCreateSentFlag(true);
 		for (ChunkServer chunk : chunkServers) {
 			Sockets.sendMessage(chunk.getName(), chunk.getPort(), message);
-			Logger.info("Forwarded " + message + " CREATE to ChunkServer-" + chunk.getName());
 			mimpl.incCreateSentCounter();
-			// Logger.info("Message:" + message);
 		}
 	}
 
 	public static void waitForChunkServerAck(MetaImpl mimpl) {
+		Logger.info("Waiting for CREATE_ACK from the Chunk Servers");
 		while (mimpl.isCreateSentFlag() && mimpl.getCreateSentCounter() > 0) {
-			Logger.info("Waiting for CREATE_ACK from the Chunk Servers");
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		Logger.info("Received all CREATE_ACKS.");
 	}
@@ -77,8 +79,6 @@ public class MetaHelperCreate {
 		String message = GFSReferences.CREATE_SUC + GFSReferences.SEND_SEPARATOR + filename;
 		int port = Nodes.getPortByHostName(server);
 		Sockets.sendMessage(server, port, message);
-		Logger.info(message + " sent to " + server);
-
 	}
 
 	private static void randomServer(List<ChunkServer> arr, List<ChunkServer> data, int start, int end, int index,
@@ -113,8 +113,9 @@ public class MetaHelperCreate {
 	public static void handleCreateAck(String server, MetaImpl mimpl) {
 		Logger.info("Received CREATE_ACK from " + server + " Reducing the counter.");
 		mimpl.decCreateSentCounter();
-		if (mimpl.getCreateSentCounter() == 0) {
+		if (mimpl.getCreateSentCounter() == 0 || mimpl.getCreateSentCounter() < 0) {
 			mimpl.setCreateSentFlag(false);
+			mimpl.setCreateSentCounter(0);
 			Logger.info("Received all CREATE_ACKS");
 		}
 	}

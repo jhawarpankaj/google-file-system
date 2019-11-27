@@ -9,7 +9,7 @@ import org.tinylog.Logger;
 import edu.utd.aos.gfs.exception.GFSException;
 import edu.utd.aos.gfs.servers.Chunk;
 import edu.utd.aos.gfs.servers.Client;
-import edu.utd.aos.gfs.servers.Meta;
+import edu.utd.aos.gfs.servers.meta.Meta;
 import edu.utd.aos.gfs.utils.LocalHost.Type;
 
 public class Sockets {

@@ -14,7 +14,6 @@ import edu.utd.aos.gfs.exception.GFSException;
 import edu.utd.aos.gfs.references.GFSReferences;
 import edu.utd.aos.gfs.utils.Helper;
 import edu.utd.aos.gfs.utils.LocalHost;
-import edu.utd.aos.gfs.utils.Nodes;
 import edu.utd.aos.gfs.utils.Sockets;
 
 public class Client {
@@ -42,9 +41,7 @@ public class Client {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 			String input = reader.readLine();
 			String requestTS = Helper.getTimestamp().toString();
-			int id = Nodes.getClientIDByHostName(LocalHost.getName());
 			String message = input + GFSReferences.SEND_SEPARATOR + requestTS;
-			message += GFSReferences.SEND_SEPARATOR + id;
 			Sockets.sendMessage(LocalHost.getName(), LocalHost.getPort(), message);
 		}
 

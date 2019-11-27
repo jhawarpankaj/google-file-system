@@ -1,4 +1,4 @@
-package edu.utd.aos.gfs.servers;
+package edu.utd.aos.gfs.servers.meta;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

@@ -1,4 +1,4 @@
-package edu.utd.aos.gfs.servers;
+package edu.utd.aos.gfs.servers.meta;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -7,6 +7,7 @@ import java.util.Collections;
 import org.tinylog.Logger;
 
 import edu.utd.aos.gfs.references.GFSReferences;
+import edu.utd.aos.gfs.utils.Nodes;
 
 public class MetaImpl {
 	ArrayList<MetaQueue> queuedRequest;
@@ -19,12 +20,16 @@ public class MetaImpl {
 		this.createSentCounter = 0;
 	}
 
-	public ArrayList<MetaQueue> getQueuedRequest() {
+	public synchronized ArrayList<MetaQueue> getQueuedRequest() {
 		return queuedRequest;
 	}
 
 	public void setQueuedRequest(ArrayList<MetaQueue> queuedRequest) {
 		this.queuedRequest = queuedRequest;
+	}
+
+	public synchronized void setCreateSentCounter(Integer createSentCounter) {
+		this.createSentCounter = createSentCounter;
 	}
 
 	public Integer getCreateSentCounter() {
@@ -35,11 +40,11 @@ public class MetaImpl {
 		return createSentFlag;
 	}
 
-	public void setCreateSentFlag(boolean createSentFlag) {
+	public synchronized void setCreateSentFlag(boolean createSentFlag) {
 		this.createSentFlag = createSentFlag;
 	}
 
-	public void decCreateSentCounter() {
+	public synchronized void decCreateSentCounter() {
 		this.createSentCounter--;
 	}
 
@@ -52,11 +57,12 @@ public class MetaImpl {
 	 * 
 	 * @return deferred request
 	 */
-	public String chooseFromDeferredQueue() {
+	public MetaQueue chooseFromDeferredQueue() {
 		Collections.sort(queuedRequest, MetaQueue.META_REQ_COMP);
 		MetaQueue chosenRequest = queuedRequest.get(0);
-		Logger.info("Next request served is:" + chosenRequest.getProcessNum() + "," + chosenRequest.getTimestamp());
-		return chosenRequest.getMessage();
+		Logger.info("Next request served is:" + chosenRequest.getMessage() + " from "
+				+ chosenRequest.getClient().getClientId() + "-@-" + chosenRequest.getTimestamp());
+		return chosenRequest;
 	}
 
 	/**
@@ -68,12 +74,13 @@ public class MetaImpl {
 
 	}
 
-	public void addToDeferredQueue(String message) {
+	public synchronized void addToDeferredQueue(String message, String sender) {
 		String tokens[] = message.split(GFSReferences.REC_SEPARATOR);
 		Timestamp timestamp = Timestamp.valueOf(tokens[2]);
-		Integer clientNum = Integer.parseInt(tokens[3]);
-		queuedRequest.add(new MetaQueue(clientNum, timestamp, message));
-		Logger.info("Message was queued");
+		int clientId = Nodes.getClientIDByHostName(sender);
+		ClientInfo ci = new ClientInfo(clientId, sender);
+		queuedRequest.add(new MetaQueue(timestamp, message, ci));
+		Logger.info("Message: " + message + " was queued, Size:" + getQueuedRequest().size());
 
 	}
 

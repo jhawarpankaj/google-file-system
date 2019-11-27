@@ -38,7 +38,6 @@ public class ClientListener extends Thread {
 				Logger.info("Forwarding the terminal input to Meta Server");
 				Sockets.sendMessage(Nodes.metaServerName(), Nodes.metaServerPort(), received);
 			} else {
-				Logger.info("Message:" + received);
 				String command = Helper.getCommand(received);
 				switch (command) {
 				case GFSReferences.READ:

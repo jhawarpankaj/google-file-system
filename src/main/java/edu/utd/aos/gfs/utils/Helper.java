@@ -142,7 +142,9 @@ public class Helper {
 		return c;
 	}
 
-	public static boolean isQueueableMessage(String command) {
+	public static boolean isQueueableMessage(String message) {
+		String tokens[] = message.split(GFSReferences.REC_SEPARATOR);
+		String command = tokens[0];
 		if (GFSReferences.CREATE.equalsIgnoreCase(command) || GFSReferences.READ.equalsIgnoreCase(command)
 				|| GFSReferences.READ.equalsIgnoreCase(command))
 			return true;
