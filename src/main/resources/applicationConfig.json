@@ -2,7 +2,7 @@
 	"nodeDetails": {
 		
 		"metaServer": {
-				"name" : "dc10.utdallas.edu",
+				"name" : "dc01.utdallas.edu",
 				"port": 5055,
 				"rootDir" : "files/meta/"
 			},

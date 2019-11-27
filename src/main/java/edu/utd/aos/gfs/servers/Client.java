@@ -31,6 +31,7 @@ public class Client {
 				t.start();
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			serverSocket.close();
 			throw new GFSException("Error while receiving message: " + e);
 		}

@@ -24,6 +24,7 @@ public class Main {
 			initialize();
 		} catch (final Exception e) {
 			Logger.error("Exiting, error: " + e);
+			e.printStackTrace();
 			System.exit(GFSReferences.CONST_CODE_ERROR);
 		}
 

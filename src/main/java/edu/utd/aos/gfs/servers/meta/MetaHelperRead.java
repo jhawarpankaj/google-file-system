@@ -2,6 +2,7 @@ package edu.utd.aos.gfs.servers.meta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.tinylog.Logger;
 
@@ -21,18 +22,17 @@ public class MetaHelperRead {
 		return readMsgDetails;
 	}
 
-	public static String getChunkServersToRead(String fileName, String chunkNum) {// TODO fetch frommeta file
-		/*
-		 * BufferedReader reader; String dir = Nodes.metaServerRootDir(); String
-		 * completeFilePath = dir + fileName; String result = ""; try { reader = new
-		 * BufferedReader(new FileReader(completeFilePath)); String line =
-		 * reader.readLine(); while (line != null) { if (line.startsWith(chunkNum)) {
-		 * String tokens[] = line.split(GFSReferences.MFILE_SEPARATOR); result =
-		 * tokens[1]; break; } line = reader.readLine(); } reader.close(); } catch
-		 * (Exception e) { Logger.info(e); } // comma separated chunk server list
-		 */
-		Logger.info("Returning the chunk servers for read");
-		return "dc01.utdallas.edu,dc02.utdallas.edu";
+	public static String getChunkServersToRead(String fileName, String chunkNum) {
+		Logger.info("Returning the chunk servers for READ");
+		if (MetaHelperHeartbeat.metaMap.containsRow(fileName)) {
+			Map<String, List<String>> map = MetaHelperHeartbeat.metaMap.row(fileName);
+			List<String> chunkdetails = map.get(chunkNum);
+			String chunkservers = chunkdetails.get(2);
+			return chunkservers;
+		} else {
+			Logger.error("Filename:" + fileName + " not found in MetaInfo, returning null");
+			return null;
+		}
 	}
 
 	public static String generateReadMsgForClient(String fileName, List<String> chunkDetails, String chunkServers) {

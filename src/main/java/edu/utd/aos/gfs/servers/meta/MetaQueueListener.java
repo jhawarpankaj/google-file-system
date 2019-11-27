@@ -52,7 +52,8 @@ public class MetaQueueListener extends Thread {
 						String chunkServersList = MetaHelperRead.getChunkServersToRead(fileToRead, chunkDetails.get(0));
 						String response = MetaHelperRead.generateReadMsgForClient(fileToRead, chunkDetails,
 								chunkServersList);
-						MetaHelperRead.forwardReadToClient(response, message);
+						MetaHelperRead.forwardReadToClient(response, ci.getHostname());
+						mimpl.deleteFromDeferredQueue();
 						break;
 
 					case GFSReferences.APPEND:
