@@ -36,7 +36,7 @@ public class Meta {
 					t.start();
 				}
 			}
-		} catch (Exception e) {
+		} catch (Exception e) {			
 			serverSocket.close();
 			throw new GFSException("Error while receiving message:" + e);
 		}

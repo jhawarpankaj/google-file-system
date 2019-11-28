@@ -24,7 +24,7 @@ public class ClientHelper {
 		message += filename + GFSReferences.SEND_SEPARATOR;
 		message += chunknum + GFSReferences.SEND_SEPARATOR;
 		message += offset;
-		// Sockets.sendMessage(chunkserver, chunkserverPort, message);
+		Sockets.sendMessage(chunkserver, chunkserverPort, message);
 		Logger.info("Sending a READ message to " + chunkserver);
 		Logger.info("Message sent:" + message);
 	}
@@ -34,7 +34,7 @@ public class ClientHelper {
 	}
 
 	public static void handleReadResponse(String message) {
-		Logger.info("Received READ response from chunk");
+		Logger.info("Received READ response from chunk: " + message);
 		String token[] = message.split(GFSReferences.REC_SEPARATOR);
 		String file = token[1];
 		String content = token[2];

@@ -104,7 +104,7 @@ public class ChunkHelper {
 	 */
 	public static String prepareContentMessage(String filename, String content) {
 		return GFSReferences.CONTENT + GFSReferences.SEND_SEPARATOR 
-				+ filename + content;		
+				+ filename + GFSReferences.SEND_SEPARATOR + content;		
 	}
 
 	

@@ -48,10 +48,10 @@ public class ClientListener extends Thread {
 					Logger.info("Received APPEND from Meta");
 					break;
 				case GFSReferences.CREATE_SUC:
-					ClientHelper.handleCreateResponse(command);
+					ClientHelper.handleCreateResponse(received);
 					break;
 				case GFSReferences.READ_CONTENT:
-					ClientHelper.handleReadResponse(command);
+					ClientHelper.handleReadResponse(received);
 					break;
 				default:
 					throw new GFSException("Unidentified input: " + command + " received on CLIENT server!!");

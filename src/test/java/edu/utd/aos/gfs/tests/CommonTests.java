@@ -1,5 +1,13 @@
 package edu.utd.aos.gfs.tests;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -12,18 +20,50 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 
 public class CommonTests {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 //		list();
 //		file();
 //		stringIndex();
 //		Integer a = null;
 //		a++;
-		String s = "rtrt,ddd,ddsd,";
-		String[] split = s.split(",");
-		System.out.println(split.length);
-		for(int i = 0; i < split.length; i++) {
-			System.out.println(split[i]);
-		}
+//		String s = "rtrt,ddd,ddsd,";
+//		String[] split = s.split(",");
+//		System.out.println(split.length);
+//		for(int i = 0; i < split.length; i++) {
+//			System.out.println(split[i]);
+//		}
+//		String filename = "/home/pankaj/Desktop/UTD-Semesters/19Fall/ML/Assignment/Final_Project/submission/readme.txt";
+		String filename = "/home/pankaj/Desktop/UTD-Semesters/baljeet.txt";
+		
+		
+		File file = new File(filename);	
+//		System.out.println(file.canRead());
+//		System.out.println(file.getTotalSpace());
+//		
+//		
+//		RandomAccessFile raf = new RandomAccessFile(file, "rw");
+//		raf.writeChar('c');
+//		raf.close();
+//		System.out.println("" + raf.readUnsignedShort());
+//		System.out.println(raf.length());
+//		raf.seek(0);
+//		System.out.println("------------");
+//		String content = raf.readUTF();
+//		
+//		System.out.println("" + content);
+//		raf.close();
+		FileInputStream fis = null;
+		byte[] bs = new byte[15];
+		int i = 0;
+	    char c;
+		fis = new FileInputStream(filename);
+		i = fis.read(bs, 1, 5);
+		System.out.println("Number of bytes read: "+i);
+         for(byte b:bs) {
+            c = (char)b;
+            System.out.print(c);
+         } 
+		
 		
 	}
 

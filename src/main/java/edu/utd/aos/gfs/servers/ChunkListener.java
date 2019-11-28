@@ -3,7 +3,7 @@ package edu.utd.aos.gfs.servers;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.RandomAccessFile;
+import java.io.FileInputStream;
 import java.net.Socket;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
@@ -52,17 +52,25 @@ public class ChunkListener extends Thread {
 					Map<String, String> parsedRead = ChunkHelper.parseRead(received);
 					String filename = parsedRead.get("filename");
 					String chunkname = parsedRead.get("chunkname");
-					long offset = Long.parseLong(parsedRead.get("offset"));
+					int offset = Integer.parseInt(parsedRead.get("offset"));
 					String rootDir = LocalHost.getUniqueChunkPath() + 
 							 filename + GFSReferences.PATHSEPARATOR;					
-					File file = new File(rootDir + chunkname);										
-					RandomAccessFile raf = new RandomAccessFile(file, "r");
-					raf.seek(offset);
-					String content = raf.readUTF();
+					File file = new File(rootDir + chunkname);					
+					byte[] bArray = new byte[(int) file.length()];
+					FileInputStream fis = new FileInputStream(file);
+					fis.read(bArray);
+					fis.close();
+					String content = "";
+					for (int i = offset; i < bArray.length; i++) {
+						content = content + (char) bArray[i];
+					}					
 					String formattedContentMsg = ChunkHelper.prepareContentMessage(filename, content);
 					Sockets.sendMessage(server, Nodes.getPortByHostName(server), formattedContentMsg);					
 					break;
 					
+				case GFSReferences.PAD_NULL:
+//					Map<String, String> parsedRead = ChunkHelper.padNull(received);
+					break;
 				default:
 					throw new GFSException("Unidentified input: " + command 
 							+ " received on CHUNK server!!");
