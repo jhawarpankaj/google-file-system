@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -180,11 +181,10 @@ public class ChunkHelper {
 	 * @param string
 	 * @throws IOException 
 	 */
-	public static void createVersionFile(String version) throws IOException {
-		byte[] data = new byte[1];
-		data[0] = (byte) 0;
+	public static void createVersionFile(String version) throws IOException {		
+//		byte [] bytes = ByteBuffer.allocate(4).putInt(0).array();		
 		FileOutputStream out = new FileOutputStream(version);
-		out.write(data);
+		out.write((byte) 0);
 		out.close();		
 	}
 
