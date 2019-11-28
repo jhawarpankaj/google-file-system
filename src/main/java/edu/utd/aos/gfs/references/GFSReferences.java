@@ -117,11 +117,41 @@ public class GFSReferences {
 	 * Pad wit Null to chunks
 	 */
 	public static final String PAD_NULL = "PAD_NULL";
+	
+	/**
+	 * Ack for pad null.
+	 */
+	public static final String PAD_NULL_ACK = "PAD_NULL_ACK";
 
 	/**
 	 * Path separator for linux file system.
 	 */
-	public static final String PATHSEPARATOR = "/";
+	public static final String PATH_SEPARATOR = "/";
+
+	/**
+	 * Send by meta to chunk server to create a new chunk.
+	 */
+	public static final String CREATE_CHUNK = "CREATE_CHUNK";
+
+	/**
+	 * Ack for successful chunk creation.
+	 */
+	public static final String CREATE_CHUNK_ACK = "CREATE_CHUNK_ACK";
+
+	/**
+	 * READY_TO_APPEND when buffered content.
+	 */
+	public static final String READY_TO_APPEND = "READY_TO_APPEND";
+
+	/**
+	 * COMMIT message for append.
+	 */
+	public static final String COMMIT = "COMMIT";
+
+	/**
+	 * ACK used after commit.
+	 */
+	public static final String COMMIT_ACK = "COMMIT_ACK";
 
 	/**
 	 * Private constructor for utility class.

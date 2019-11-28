@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.io.FileUtils;
 import org.tinylog.Logger;
 
 import edu.utd.aos.gfs.exception.GFSException;
@@ -39,7 +40,7 @@ public class ChunkListener extends Thread {
 			Logger.debug("Received message: " + received);
 			String command = Helper.getCommand(received);
 			
-			switch (command) {	
+			switch (command) {
 			
 				case GFSReferences.CREATE:
 					String fileName = ChunkHelper.parseCreate(received);
@@ -54,8 +55,8 @@ public class ChunkListener extends Thread {
 					String chunkname = parsedRead.get("chunkname");
 					int offset = Integer.parseInt(parsedRead.get("offset"));
 					String rootDir = LocalHost.getUniqueChunkPath() + 
-							 filename + GFSReferences.PATHSEPARATOR;					
-					File file = new File(rootDir + chunkname);					
+							 filename + GFSReferences.PATH_SEPARATOR;					
+					File file = new File(rootDir + chunkname);		
 					byte[] bArray = new byte[(int) file.length()];
 					FileInputStream fis = new FileInputStream(file);
 					fis.read(bArray);
@@ -69,8 +70,75 @@ public class ChunkListener extends Thread {
 					break;
 					
 				case GFSReferences.PAD_NULL:
-//					Map<String, String> parsedRead = ChunkHelper.padNull(received);
+					Map<String, String> parsedPadNull = ChunkHelper.parsePadNull(received);
+					String fileNamePad = parsedPadNull.get("filename");
+					String chunkNamePad = parsedPadNull.get("chunkname");
+					String rootDirPad = LocalHost.getUniqueChunkPath() + 
+							 fileNamePad + GFSReferences.PATH_SEPARATOR;
+					File filePad = new File(rootDirPad + chunkNamePad);
+//					byte[] bArrayPad = new byte[(int) filePad.length()];
+					byte[] bArrayPad = FileUtils.readFileToByteArray(filePad);
+					String padNullResponse = ChunkHelper.preparePadNullResponse(fileNamePad);
+					if(bArrayPad.length < GFSReferences.CHUNK_SIZE) {					
+						byte[] writeArray = new byte[GFSReferences.CHUNK_SIZE];
+						int i = 0;
+						for(; i < bArrayPad.length; i++) {
+							writeArray[i] = bArrayPad[i];
+						}
+						char c = '\0';
+						for(; i < GFSReferences.CHUNK_SIZE - bArrayPad.length; i++) {
+							writeArray[i] = (byte) c;
+						}
+						ChunkHelper.updateVersion(rootDirPad + chunkNamePad + ".version");
+						FileUtils.writeByteArrayToFile(filePad, writeArray);						
+						Logger.debug("Length of the file after appending null: " + filePad.length());
+					}
+					Chunk.sendAHeartBeat();
+					Sockets.sendMessage(server, Nodes.getPortByHostName(server), padNullResponse);
 					break;
+					
+				case GFSReferences.CREATE_CHUNK:
+					Map<String, String> parsedCreateChunk = ChunkHelper.parseCreateChunk(received);
+					String createChunkFileName = parsedCreateChunk.get("filename");
+					String createChunkName = parsedCreateChunk.get("chunkname");
+					String createChunkRootDir = LocalHost.getUniqueChunkPath() + createChunkFileName 
+							+ GFSReferences.PATH_SEPARATOR;
+					File createChunkFile = new File(createChunkRootDir + createChunkName);
+					ChunkHelper.createVersionFile(createChunkRootDir + createChunkName + ".version");
+					FileUtils.touch(createChunkFile);					
+					String createChunkResponse = ChunkHelper.prepareCreateChunkResponse(createChunkFileName);
+					Chunk.sendAHeartBeat();
+					Sockets.sendMessage(server, Nodes.getPortByHostName(server), createChunkResponse);
+					break;
+					
+				case GFSReferences.APPEND:
+					Map<String, String> parsedAppendChunk = ChunkHelper.parseAppend(received);
+					String fileNameAppend = parsedAppendChunk.get("filename");
+					String chunkNameAppend = parsedAppendChunk.get("chunkname");
+					String appendContent = parsedAppendChunk.get("content");
+					String appendChunkRootDir = LocalHost.getUniqueChunkPath() + fileNameAppend 
+							+ GFSReferences.PATH_SEPARATOR;
+					File appendChunk = new File(appendChunkRootDir + chunkNameAppend);
+					byte[] currentBytesAppend = ChunkHelper.getExistingBytes(appendChunk);
+					byte[] newContent = appendContent.getBytes();
+					ChunkHelper.buffer = ChunkHelper.getTotalBytes(currentBytesAppend, newContent);
+					String prepareReadyToAppend = ChunkHelper.prepareReadyToAppend(fileNameAppend);
+					Sockets.sendMessage(server, Nodes.getPortByHostName(server), prepareReadyToAppend);
+					break;
+					
+				case GFSReferences.COMMIT:
+					Map<String, String> parsedCommit = ChunkHelper.parseCommit(received);
+					String filenameCommit = parsedCommit.get("filename");
+					String chunkNameCommit = parsedCommit.get("chunkname");
+					String commitRootDir = LocalHost.getUniqueChunkPath() + filenameCommit 
+							+ GFSReferences.PATH_SEPARATOR;
+					ChunkHelper.updateVersion(commitRootDir + chunkNameCommit + ".version");
+					FileUtils.writeByteArrayToFile(new File(commitRootDir + chunkNameCommit), ChunkHelper.buffer);
+					Chunk.sendAHeartBeat();
+					String prepareCommitAck = ChunkHelper.prepareCommitAck(filenameCommit);
+					Sockets.sendMessage(server, Nodes.getPortByHostName(server), prepareCommitAck);
+					break;
+					
 				default:
 					throw new GFSException("Unidentified input: " + command 
 							+ " received on CHUNK server!!");
