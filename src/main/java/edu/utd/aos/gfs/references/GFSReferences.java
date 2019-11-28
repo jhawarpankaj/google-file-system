@@ -40,7 +40,7 @@ public class GFSReferences {
 	 * Command used by client to read a file.
 	 */
 	public static final String READ = "READ";
-	
+
 	/**
 	 * Used by chunk while sending content for read command.
 	 */
@@ -117,7 +117,7 @@ public class GFSReferences {
 	 * Pad wit Null to chunks
 	 */
 	public static final String PAD_NULL = "PAD_NULL";
-	
+
 	/**
 	 * Ack for pad null.
 	 */
@@ -154,9 +154,14 @@ public class GFSReferences {
 	public static final String COMMIT_ACK = "COMMIT_ACK";
 
 	/**
+	 * APPEND send from client to meta
+	 */
+	public static final String APPEND_ACK_META = "APPEND_ACK_META";
+
+	/**
 	 * Private constructor for utility class.
-	 */	
-	
+	 */
+
 	private GFSReferences() {
 
 	}
