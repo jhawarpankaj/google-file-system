@@ -90,7 +90,7 @@ public class Helper {
 		for (Entry<String, JsonElement> entry : heartbeatJson.entrySet()) {
 			String filename = entry.getKey();
 			JsonObject chunkjObj = entry.getValue().getAsJsonObject();
-			for(Entry<String, JsonElement> chunk: chunkjObj.entrySet()) {
+			for (Entry<String, JsonElement> chunk : chunkjObj.entrySet()) {
 				String chunkName = chunk.getKey();
 				JsonArray sizeAndVersion = chunk.getValue().getAsJsonArray();
 				String size = sizeAndVersion.get(0).getAsString();
@@ -116,7 +116,6 @@ public class Helper {
 		return chunkServername.split("\\.")[0];
 	}
 
-/////////AMTUL CHANGE 26 NOVEMBER
 	/**
 	 * @return Current Timestamp of the node
 	 */
@@ -153,10 +152,12 @@ public class Helper {
 		String tokens[] = message.split(GFSReferences.REC_SEPARATOR);
 		String command = tokens[0];
 		if (GFSReferences.CREATE.equalsIgnoreCase(command) || GFSReferences.READ.equalsIgnoreCase(command)
-				|| GFSReferences.APPEND.equalsIgnoreCase(command))
+				|| GFSReferences.APPEND.equalsIgnoreCase(command)) {
+			Logger.info("Is a Queueable message");
 			return true;
-		else
+		} else {
 			return false;
+		}
 
 	}
 

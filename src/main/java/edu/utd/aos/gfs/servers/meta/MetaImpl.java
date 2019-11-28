@@ -111,6 +111,7 @@ public class MetaImpl {
 	}
 
 	public synchronized void addToDeferredQueue(String message, String sender) {
+		Logger.info("Adding message to the Queue");
 		String tokens[] = message.split(GFSReferences.REC_SEPARATOR);
 		String command = tokens[0];
 		Timestamp timestamp = null;
@@ -118,8 +119,8 @@ public class MetaImpl {
 			timestamp = Timestamp.valueOf(tokens[2]);
 		} else if (GFSReferences.READ.equalsIgnoreCase(command)) {
 			timestamp = Timestamp.valueOf(tokens[3]);
-		} else if (GFSReferences.APPEND.equalsIgnoreCase(command)) {// TODO
-			timestamp = Timestamp.valueOf(tokens[2]);
+		} else if (GFSReferences.APPEND.equalsIgnoreCase(command)) {
+			timestamp = Timestamp.valueOf(tokens[3]);
 		}
 		int clientId = Nodes.getClientIDByHostName(sender);
 		ClientInfo ci = new ClientInfo(clientId, sender);

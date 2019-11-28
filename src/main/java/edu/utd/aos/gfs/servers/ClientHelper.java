@@ -42,27 +42,30 @@ public class ClientHelper {
 		// TODO display to terminal
 	}
 
-	private static String generateRandomWord() {
+	private static String generateRandomWord(int datasize) {
 		String randomString = "";
 		Random random = new Random();
-		char[] word = new char[random.nextInt(8) + 3];
+		char[] word = new char[datasize];
 		for (int j = 0; j < word.length; j++) {
 			word[j] = (char) ('a' + random.nextInt(26));
 		}
 		randomString = new String(word);
-		// System.out.println(randomString);
 		return randomString;
 	}
 
 	public static void forwardAppendToChunk(String message, ClientImpl cimpl) {
+		Logger.info("Initiating 2-Phase Commit from Client");
 		sendAppendToChunks(message, cimpl);
 		waitForReadyToAppendAck(cimpl);
 		sendCommitToChunks(cimpl);
 		waitForCommitAck(cimpl);
 		sendAppendAckMeta(message);
+		Logger.info("APPEND has been completed");
+		cimpl.setAppendMessage("");
 	}
 
 	private static void sendAppendAckMeta(String message) {
+		Logger.info("Completed 2-Phase Commit from Client, sending APPEND_ACK_META to Meta server");
 		String tokens[] = message.split(GFSReferences.REC_SEPARATOR);
 		String filename = tokens[1];
 		String msg = GFSReferences.APPEND_ACK_META + GFSReferences.SEND_SEPARATOR;
@@ -71,14 +74,16 @@ public class ClientHelper {
 	}
 
 	private static void sendAppendToChunks(String message, ClientImpl cimpl) {
+		Logger.info("Beginning to send APPEND to chunk servers:" + message);
 		String tokens[] = message.split(GFSReferences.REC_SEPARATOR);
 		String filename = tokens[1];
 		String chunknum = tokens[2];
 		String chunkservers[] = tokens[3].split(",");
+		int datasize = Integer.parseInt(tokens[4]);
 		String forwardMsg = GFSReferences.APPEND + GFSReferences.SEND_SEPARATOR;
 		forwardMsg += filename + GFSReferences.SEND_SEPARATOR;
 		forwardMsg += chunknum + GFSReferences.SEND_SEPARATOR;
-		forwardMsg += generateRandomWord();
+		forwardMsg += generateRandomWord(datasize);
 		cimpl.setAppendMessage(message);
 		cimpl.setAppendSentFlag(true);
 		for (String chunkserver : chunkservers) {
@@ -86,6 +91,7 @@ public class ClientHelper {
 			Sockets.sendMessage(chunkserver, port, forwardMsg);
 			cimpl.incAppendSentCounter();
 		}
+		Logger.info("Sent all APPENDs to the chunk servers");
 	}
 
 	public static void waitForReadyToAppendAck(ClientImpl cimpl) {
@@ -110,17 +116,18 @@ public class ClientHelper {
 		}
 	}
 
-	public static void handleAppendAck(String received, String server, ClientImpl cimpl) {
+	public static void handleCommitAck(String received, String server, ClientImpl cimpl) {
 		Logger.info("Received COMMIT_ACK from " + server + " Reducing the counter.");
 		cimpl.decAppendSentCounter();
 		if (cimpl.getAppendSentCounter() == 0 || cimpl.getAppendSentCounter() < 0) {
 			cimpl.setAppendSentFlag(false);
 			cimpl.setAppendSentCounter(0);
-			Logger.info("Received all APPEND_ACK.");
+			Logger.info("Received all COMMIT_ACK.");
 		}
 	}
 
 	private static void sendCommitToChunks(ClientImpl cimpl) {
+		Logger.info("Sending COMMIT to chunks");
 		String message = cimpl.getAppendMessage();
 		String tokens[] = message.split(GFSReferences.REC_SEPARATOR);
 		String filename = tokens[1];
@@ -135,10 +142,11 @@ public class ClientHelper {
 			Sockets.sendMessage(chunkserver, port, commit);
 			cimpl.incAppendSentCounter();
 		}
+		Logger.info("Finished sending COMMIT to all chunks");
 	}
 
 	public static void waitForCommitAck(ClientImpl cimpl) {
-		Logger.info("Waiting for APPEND_ACK from the Chunk Servers");
+		Logger.info("Waiting for COMMIT_ACK from the Chunk Servers");
 		while (cimpl.isAppendSentFlag() && cimpl.getAppendSentCounter() > 0) {
 			try {
 				Thread.sleep(1000);
@@ -146,7 +154,7 @@ public class ClientHelper {
 				e.printStackTrace();
 			}
 		}
-		Logger.info("Received all APPEND_ACK ACKS.");
+		Logger.info("Received all COMMIT_ACKs.");
 	}
 
 }

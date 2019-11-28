@@ -36,19 +36,8 @@ public class MetaHelperAppend {
 		return result;
 	}
 
-	public static boolean canAppendLastChunk() {
-		boolean status = false;
-		// pick from map
-		// int compare=compareDataSize(chunksize, datasize)
-		// if can append
-		// send append with details to client
-		// else send create to 3 random chunks
-		// wait for responses
-		// send append to clientss
-		return status;
-	}
-
 	public static void appendOrCreate(String message, String server, MetaImpl mimpl) {
+		Logger.info("Deciding whether to APPEND or CREATE&APPEND");
 		String tokens[] = message.split(GFSReferences.REC_SEPARATOR);
 		String filename = tokens[1];
 		int datasize = Integer.valueOf(tokens[2]);
@@ -56,14 +45,16 @@ public class MetaHelperAppend {
 		int chunksize = Integer.valueOf(lastChunk.get(0));
 		int compare = compareDataSize(chunksize, datasize);
 		if (compare == 1 || compare == 0) {
-			sendAppendToClient(filename, server, lastChunk.get(2), lastChunk.get(3), mimpl);
+			Logger.info("Happy Case: Data can be appended to the last chunk");
+			sendAppendToClient(filename, server, lastChunk.get(2), lastChunk.get(3), mimpl, datasize);
 		} else {
 			padWithNull(filename, lastChunk.get(2), lastChunk.get(3), mimpl);
 			waitForPadAck(mimpl);
 			String newChunkNum = getNewChunkNum(lastChunk.get(2));
 			String chunkservers = createBeforeAppend(filename, newChunkNum, mimpl);
-			sendAppendToClient(filename, server, newChunkNum, chunkservers, mimpl);
+			sendAppendToClient(filename, server, newChunkNum, chunkservers, mimpl, datasize);
 		}
+		Logger.info("Done with the APPEND completely");
 	}
 
 	private static String getNewChunkNum(String prevChunkNum) {
@@ -103,15 +94,17 @@ public class MetaHelperAppend {
 
 	// sunny day case: data can be appended in the last chunk
 	private static void sendAppendToClient(String filename, String server, String chunknum, String chunkservers,
-			MetaImpl mimpl) {
+			MetaImpl mimpl, int datasize) {
 		String message = GFSReferences.APPEND + GFSReferences.SEND_SEPARATOR;
 		message += filename + GFSReferences.SEND_SEPARATOR;
 		message += chunknum + GFSReferences.SEND_SEPARATOR;
-		message += chunkservers;
+		message += chunkservers + GFSReferences.SEND_SEPARATOR;
+		message += datasize;
 		int port = Nodes.getPortByHostName(server);
 		Sockets.sendMessage(server, port, message);
 		Logger.info("Sent APPEND to client, message:" + message);
 		mimpl.setAppendSentFlag(true);
+		Logger.info("Waiting for APPEND_ACK_META from client:" + server);
 		waitForAppendAck(mimpl);
 
 	}
@@ -135,20 +128,14 @@ public class MetaHelperAppend {
 	}
 
 	private static String createBeforeAppend(String filename, String newChunkNum, MetaImpl mimpl) {
-		// Logger.info("Received CREATE from " + ci.getHostname());
-		String fileToCreate = filename;// MetaHelperCreate.getFileName(message);
+		String fileToCreate = filename;
 		List<ChunkServer> chunkServers = MetaHelperCreate.get_3RandomChunkServers();
-		// MetaHelperCreate.initMetaFile(fileToCreate, chunkServers);// TODO
-		// MetaHelperCreate.forwardCreationToChunks(chunkServers, fileToCreate, mimpl);
 		forwardNewChunkCreationToChunks(chunkServers, filename, newChunkNum, mimpl);
 		waitForNewChunkServerAck(mimpl);
 		String chunks = "";
 		for (ChunkServer chunk : chunkServers)
 			chunks += chunk + ",";
 		return chunks.substring(0, chunks.length() - 1);
-		// MetaHelperCreate.waitForChunkServerAck(mimpl);
-		// MetaHelperCreate.sendCreateSuccessClient(ci.getHostname(), fileToCreate);
-		// mimpl.deleteFromDeferredQueue();
 	}
 
 	public static void forwardNewChunkCreationToChunks(List<ChunkServer> chunkServers, String fileName, String chunknum,
@@ -220,9 +207,11 @@ public class MetaHelperAppend {
 	}
 
 	private static int compareDataSize(int chunksize, int datasize) {
-		if (chunksize > datasize)
+		int remaining = GFSReferences.CHUNK_SIZE - chunksize;
+		Logger.info("Chunksize: " + chunksize + " Datasize: " + datasize + " Remaining size: " + remaining);
+		if (remaining > datasize)
 			return 1;
-		else if (chunksize == datasize)
+		else if (remaining == datasize)
 			return 0;
 		else
 			return -1;

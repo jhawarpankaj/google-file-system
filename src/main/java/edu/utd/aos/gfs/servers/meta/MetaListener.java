@@ -40,10 +40,10 @@ public class MetaListener extends Thread {
 			case GFSReferences.HEARTBEAT:
 				lock.lock();
 				String message = Helper.getMessage(received);
-				Logger.debug("Received heartbeat: " + message);
+				// Logger.debug("Received heartbeat: " + message);
 				JsonObject heartbeatJson = Helper.getParsedHeartBeat(message);
-				Logger.debug("Json Parsed heart beat message: " + heartbeatJson); // TODO
-//					Helper.iterateHeartBeat(server, heartbeatJson);
+				// Logger.debug("Json Parsed heart beat message: " + heartbeatJson); // TODO
+//					dont uncomment Helper.iterateHeartBeat(server, heartbeatJson);
 				MetaHelperHeartbeat.updateHeartBeat(server, heartbeatJson);
 				Logger.debug(MetaHelperHeartbeat.metaMap);
 				lock.unlock();

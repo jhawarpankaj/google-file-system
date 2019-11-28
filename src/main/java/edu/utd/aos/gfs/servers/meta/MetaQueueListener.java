@@ -37,7 +37,6 @@ public class MetaQueueListener extends Thread {
 						Logger.info("Received CREATE from " + ci.getHostname());
 						String fileToCreate = MetaHelperCreate.getFileName(message);
 						List<ChunkServer> chunkServers = MetaHelperCreate.get_3RandomChunkServers();
-						// MetaHelperCreate.initMetaFile(fileToCreate, chunkServers);// TODO
 						MetaHelperCreate.forwardCreationToChunks(chunkServers, fileToCreate, mimpl);
 						MetaHelperCreate.waitForChunkServerAck(mimpl);
 						MetaHelperCreate.sendCreateSuccessClient(ci.getHostname(), fileToCreate);
@@ -57,8 +56,7 @@ public class MetaQueueListener extends Thread {
 						break;
 
 					case GFSReferences.APPEND:
-						// String fileToAppend = Helper.getMessage(message);
-						// String appendContent = Helper.getParamThree(message);
+						Logger.info("Received APPEND from " + ci.getHostname());
 						MetaHelperAppend.appendOrCreate(message, ci.getHostname(), mimpl);
 						mimpl.deleteFromDeferredQueue();
 

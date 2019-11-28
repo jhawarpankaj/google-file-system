@@ -56,7 +56,7 @@ public class ClientListener extends Thread {
 					break;
 				case GFSReferences.COMMIT_ACK:
 					Logger.info("Received COMMIT_ACK from Chunks");
-					ClientHelper.handleAppendAck(received, sender, cimpl);
+					ClientHelper.handleCommitAck(received, sender, cimpl);
 					break;
 				case GFSReferences.READY_TO_APPEND:
 					ClientHelper.handleReadyToAppendResponse(received, sender, cimpl);
