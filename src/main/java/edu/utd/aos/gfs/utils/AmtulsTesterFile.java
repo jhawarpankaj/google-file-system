@@ -2,6 +2,8 @@ package edu.utd.aos.gfs.utils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
@@ -33,16 +35,28 @@ public class AmtulsTesterFile {
 		// JsonObject heartbeatJson = Helper.getParsedHeartBeat(message);
 		// Helper.iterateHeartBeat("", heartbeatJson);
 		// generateRandomWord();
-		String input = "APPEND||file1||28";
-		String requestTS = Helper.getTimestamp().toString();
-		String message = "";
-		String command = Helper.getCommand(input);
-		if (GFSReferences.APPEND.equalsIgnoreCase(command)) {
-			String randomContent = generateRandomWord();
-			input = input + GFSReferences.SEND_SEPARATOR + randomContent;
+//		String input = "APPEND||file1||28";
+//		String requestTS = Helper.getTimestamp().toString();
+//		String message = "";
+//		String command = Helper.getCommand(input);
+//		if (GFSReferences.APPEND.equalsIgnoreCase(command)) {
+//			String randomContent = generateRandomWord();
+//			input = input + GFSReferences.SEND_SEPARATOR + randomContent;
+//		}
+//		message = input + GFSReferences.SEND_SEPARATOR + requestTS;
+//		System.out.println(message);
+		try {
+			File file = new File("/Users/amtulnazneen/Downloads/hello.txt");
+			byte[] bArray = new byte[(int) file.length()];
+			FileInputStream fis = new FileInputStream(file);
+			fis.read(bArray);
+			fis.close();
+			for (int i = 4; i < bArray.length; i++) {
+				System.out.print((char) bArray[i]);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		message = input + GFSReferences.SEND_SEPARATOR + requestTS;
-		System.out.println(message);
 	}
 
 	public static String generateRandomWord() {

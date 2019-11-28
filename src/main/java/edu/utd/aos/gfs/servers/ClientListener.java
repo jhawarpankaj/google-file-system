@@ -19,13 +19,16 @@ public class ClientListener extends Thread {
 	final ServerSocket owner;
 	final DataInputStream dis;
 	final DataOutputStream dos;
+	ClientImpl cimpl;
 	public static final ReentrantLock lock = new ReentrantLock();
 
-	public ClientListener(Socket worker, DataInputStream dis, DataOutputStream dos, ServerSocket owner) {
+	public ClientListener(Socket worker, DataInputStream dis, DataOutputStream dos, ServerSocket owner,
+			ClientImpl cimpl) {
 		this.worker = worker;
 		this.dis = dis;
 		this.dos = dos;
 		this.owner = owner;
+		this.cimpl = cimpl;
 	}
 
 	@Override
@@ -44,15 +47,24 @@ public class ClientListener extends Thread {
 					Logger.info("Received READ from Meta");
 					ClientHelper.forwardReadToChunk(received);
 					break;
+				case GFSReferences.READ_CONTENT:
+					ClientHelper.handleReadResponse(received);
+					break;
 				case GFSReferences.APPEND:
 					Logger.info("Received APPEND from Meta");
+					ClientHelper.forwardAppendToChunk(received, cimpl);
+					break;
+				case GFSReferences.COMMIT_ACK:
+					Logger.info("Received COMMIT_ACK from Chunks");
+					ClientHelper.handleAppendAck(received, sender, cimpl);
+					break;
+				case GFSReferences.READY_TO_APPEND:
+					ClientHelper.handleReadyToAppendResponse(received, sender, cimpl);
 					break;
 				case GFSReferences.CREATE_SUC:
 					ClientHelper.handleCreateResponse(received);
 					break;
-				case GFSReferences.READ_CONTENT:
-					ClientHelper.handleReadResponse(received);
-					break;
+
 				default:
 					throw new GFSException("Unidentified input: " + command + " received on CLIENT server!!");
 				}

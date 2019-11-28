@@ -15,6 +15,7 @@ public class MetaImpl {
 	boolean createSentFlag;
 	Integer padSentCounter;
 	boolean padSentFlag;
+	boolean appendSentFlag;
 
 	public MetaImpl() {
 		super();
@@ -61,6 +62,14 @@ public class MetaImpl {
 
 	public synchronized void setPadSentFlag(boolean padSentFlag) {
 		this.padSentFlag = padSentFlag;
+	}
+
+	public boolean isAppendSentFlag() {
+		return appendSentFlag;
+	}
+
+	public void setAppendSentFlag(boolean appendSentFlag) {
+		this.appendSentFlag = appendSentFlag;
 	}
 
 	public synchronized void decCreateSentCounter() {

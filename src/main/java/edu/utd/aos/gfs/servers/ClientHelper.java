@@ -54,7 +54,23 @@ public class ClientHelper {
 		return randomString;
 	}
 
-	public static void handleAppendResponseFromMeta(String message) {
+	public static void forwardAppendToChunk(String message, ClientImpl cimpl) {
+		sendAppendToChunks(message, cimpl);
+		waitForReadyToAppendAck(cimpl);
+		sendCommitToChunks(cimpl);
+		waitForCommitAck(cimpl);
+		sendAppendAckMeta(message);
+	}
+
+	private static void sendAppendAckMeta(String message) {
+		String tokens[] = message.split(GFSReferences.REC_SEPARATOR);
+		String filename = tokens[1];
+		String msg = GFSReferences.APPEND_ACK_META + GFSReferences.SEND_SEPARATOR;
+		msg += filename;
+		Sockets.sendMessage(Nodes.metaServerName(), Nodes.metaServerPort(), msg);
+	}
+
+	private static void sendAppendToChunks(String message, ClientImpl cimpl) {
 		String tokens[] = message.split(GFSReferences.REC_SEPARATOR);
 		String filename = tokens[1];
 		String chunknum = tokens[2];
@@ -63,11 +79,74 @@ public class ClientHelper {
 		forwardMsg += filename + GFSReferences.SEND_SEPARATOR;
 		forwardMsg += chunknum + GFSReferences.SEND_SEPARATOR;
 		forwardMsg += generateRandomWord();
+		cimpl.setAppendMessage(message);
+		cimpl.setAppendSentFlag(true);
 		for (String chunkserver : chunkservers) {
 			int port = Nodes.getPortByHostName(chunkserver);
-			Sockets.sendMessage(chunkserver, port, message);
-			// increment counter TODO
+			Sockets.sendMessage(chunkserver, port, forwardMsg);
+			cimpl.incAppendSentCounter();
 		}
+	}
+
+	public static void waitForReadyToAppendAck(ClientImpl cimpl) {
+		Logger.info("Waiting for READY_TO_APPEND from the Chunk Servers");
+		while (cimpl.isAppendSentFlag() && cimpl.getAppendSentCounter() > 0) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		Logger.info("Received all READY_TO_APPEND ACKS.");
+	}
+
+	public static void handleReadyToAppendResponse(String received, String server, ClientImpl cimpl) {
+		Logger.info("Received READY_TO_APPEND from " + server + " Reducing the counter.");
+		cimpl.decAppendSentCounter();
+		if (cimpl.getAppendSentCounter() == 0 || cimpl.getAppendSentCounter() < 0) {
+			cimpl.setAppendSentFlag(false);
+			cimpl.setAppendSentCounter(0);
+			Logger.info("Received all READY_TO_APPEND ACKS.");
+		}
+	}
+
+	public static void handleAppendAck(String received, String server, ClientImpl cimpl) {
+		Logger.info("Received COMMIT_ACK from " + server + " Reducing the counter.");
+		cimpl.decAppendSentCounter();
+		if (cimpl.getAppendSentCounter() == 0 || cimpl.getAppendSentCounter() < 0) {
+			cimpl.setAppendSentFlag(false);
+			cimpl.setAppendSentCounter(0);
+			Logger.info("Received all APPEND_ACK.");
+		}
+	}
+
+	private static void sendCommitToChunks(ClientImpl cimpl) {
+		String message = cimpl.getAppendMessage();
+		String tokens[] = message.split(GFSReferences.REC_SEPARATOR);
+		String filename = tokens[1];
+		String chunknum = tokens[2];
+		String chunkservers[] = tokens[3].split(",");
+		String commit = GFSReferences.COMMIT + GFSReferences.SEND_SEPARATOR;
+		commit += filename + GFSReferences.SEND_SEPARATOR;
+		commit += chunknum;
+		cimpl.setAppendSentFlag(true);
+		for (String chunkserver : chunkservers) {
+			int port = Nodes.getPortByHostName(chunkserver);
+			Sockets.sendMessage(chunkserver, port, commit);
+			cimpl.incAppendSentCounter();
+		}
+	}
+
+	public static void waitForCommitAck(ClientImpl cimpl) {
+		Logger.info("Waiting for APPEND_ACK from the Chunk Servers");
+		while (cimpl.isAppendSentFlag() && cimpl.getAppendSentCounter() > 0) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		Logger.info("Received all APPEND_ACK ACKS.");
 	}
 
 }

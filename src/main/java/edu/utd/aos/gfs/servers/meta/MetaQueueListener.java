@@ -60,6 +60,7 @@ public class MetaQueueListener extends Thread {
 						// String fileToAppend = Helper.getMessage(message);
 						// String appendContent = Helper.getParamThree(message);
 						MetaHelperAppend.appendOrCreate(message, ci.getHostname(), mimpl);
+						mimpl.deleteFromDeferredQueue();
 
 						break;
 

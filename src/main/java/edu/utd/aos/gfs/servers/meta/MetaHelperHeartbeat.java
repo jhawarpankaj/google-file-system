@@ -14,9 +14,10 @@ import com.google.gson.JsonObject;
 import edu.utd.aos.gfs.utils.Helper;
 
 public class MetaHelperHeartbeat {
-	
+
+	// size,version, (,separated server names)
 	public static Table<String, String, List<String>> metaMap = HashBasedTable.create();
-	
+
 	public static void main(String[] args) {
 		// String json = "{\"file1\":{\"chunk1\":[\"0\",\"0\"]}}";
 		String json = "{\"file1\":{\"chunk1\":{[1, 223]},\"chunk2\":{[0, 123]}},\"file2\":{\"chunk1\":{[3, 2232]},\"chunk3\":{[3, 2232]}}}";
@@ -39,27 +40,27 @@ public class MetaHelperHeartbeat {
 			}
 		}
 	}
-	
+
 	/**
 	 * Compare and update the heart beat.
-	 * @param server 
+	 * 
+	 * @param server
 	 * @param heartbeatJson Input heartbeat in Json format.
 	 */
 	public static void updateHeartBeat(String server, JsonObject heartbeatJson) {
-		
-		for(Map.Entry<String, JsonElement> jObj: heartbeatJson.entrySet()) {
+
+		for (Map.Entry<String, JsonElement> jObj : heartbeatJson.entrySet()) {
 			String fileName = jObj.getKey();
 			JsonObject chunkjObj = jObj.getValue().getAsJsonObject();
-			for(Map.Entry<String, JsonElement> allChunks: chunkjObj.entrySet()) {
+			for (Map.Entry<String, JsonElement> allChunks : chunkjObj.entrySet()) {
 				String chunkName = allChunks.getKey();
 				JsonArray chunkSizeAndVersion = allChunks.getValue().getAsJsonArray();
-				List<String> temp = getListFromJsonArray(chunkSizeAndVersion); 
+				List<String> temp = getListFromJsonArray(chunkSizeAndVersion);
 				// return [size, version]
-				if(!metaMap.containsRow(fileName) || !metaMap.contains(fileName, chunkName)) {					
+				if (!metaMap.containsRow(fileName) || !metaMap.contains(fileName, chunkName)) {
 					temp.add(server + ",");
 					metaMap.put(fileName, chunkName, temp);
-				}
-				else {
+				} else {
 					List<String> oldSizeAndVersionDetails = metaMap.get(fileName, chunkName);
 					long oldSize = Long.parseLong(oldSizeAndVersionDetails.get(0));
 					int oldVersion = Integer.parseInt(oldSizeAndVersionDetails.get(1));
@@ -68,25 +69,24 @@ public class MetaHelperHeartbeat {
 					String serverCommaSeparated = oldSizeAndVersionDetails.get(2);
 					String[] serverList = serverCommaSeparated.split(",");
 					boolean flag = false;
-					for(int i = 0; i < serverList.length; i++) {
-						if(serverList[i].equalsIgnoreCase(server)) {
+					for (int i = 0; i < serverList.length; i++) {
+						if (serverList[i].equalsIgnoreCase(server)) {
 							flag = true;
 							break;
 						}
 					}
-					if(!flag) {
+					if (!flag) {
 						serverCommaSeparated = serverCommaSeparated + server + ",";
 					}
-					if(oldSize == newSize && oldVersion == newVersion){
-						if(!flag) {
+					if (oldSize == newSize && oldVersion == newVersion) {
+						if (!flag) {
 							oldSizeAndVersionDetails.set(2, serverCommaSeparated);
 							metaMap.put(fileName, chunkName, oldSizeAndVersionDetails);
-						}						
-					}
-					else if(newVersion >= oldVersion && newSize >= oldSize) {
+						}
+					} else if (newVersion >= oldVersion && newSize >= oldSize) {
 						oldSizeAndVersionDetails.set(0, String.valueOf(newSize));
 						oldSizeAndVersionDetails.set(1, String.valueOf(newVersion));
-						if(!flag) {
+						if (!flag) {
 							oldSizeAndVersionDetails.set(2, serverCommaSeparated);
 						}
 						metaMap.put(fileName, chunkName, oldSizeAndVersionDetails);
@@ -98,10 +98,10 @@ public class MetaHelperHeartbeat {
 
 	private static List<String> getListFromJsonArray(JsonArray chunkSizeAndVersion) {
 		List<String> result = new ArrayList<String>();
-		for(int i = 0; i < chunkSizeAndVersion.size(); i++) {
+		for (int i = 0; i < chunkSizeAndVersion.size(); i++) {
 			result.add(chunkSizeAndVersion.get(i).getAsString());
 		}
 		return result;
-		
+
 	}
 }

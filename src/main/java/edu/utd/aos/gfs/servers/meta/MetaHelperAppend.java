@@ -2,7 +2,9 @@ package edu.utd.aos.gfs.servers.meta;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.tinylog.Logger;
 
@@ -48,47 +50,151 @@ public class MetaHelperAppend {
 
 	public static void appendOrCreate(String message, String server, MetaImpl mimpl) {
 		String tokens[] = message.split(GFSReferences.REC_SEPARATOR);
-		// APPEND||file1||28||2019-11-27 14:44:22.062
 		String filename = tokens[1];
 		int datasize = Integer.valueOf(tokens[2]);
-		int chunksize = 0;// TODO getlastchunksize, store last chunks
+		List<String> lastChunk = getLastChunkDetails(filename);
+		int chunksize = Integer.valueOf(lastChunk.get(0));
 		int compare = compareDataSize(chunksize, datasize);
-		if (compare == 1) {
-			sendAppendToClient(filename, server);
+		if (compare == 1 || compare == 0) {
+			sendAppendToClient(filename, server, lastChunk.get(2), lastChunk.get(3), mimpl);
 		} else {
-			padWithNull("", "");
+			padWithNull(filename, lastChunk.get(2), lastChunk.get(3), mimpl);
 			waitForPadAck(mimpl);
-			createBeforeAppend(filename, mimpl);
-			sendAppendToClient(filename, server);
+			String newChunkNum = getNewChunkNum(lastChunk.get(2));
+			String chunkservers = createBeforeAppend(filename, newChunkNum, mimpl);
+			sendAppendToClient(filename, server, newChunkNum, chunkservers, mimpl);
 		}
 	}
 
-	// sunny day case: data can be
-	private static void sendAppendToClient(String filename, String server) {
-		String message = GFSReferences.APPEND + GFSReferences.SEND_SEPARATOR;
-		message += filename + GFSReferences.SEND_SEPARATOR;
-		// TODO-last chunkname and chunkservers
-		int port = Nodes.getPortByHostName(server);
-		Sockets.sendMessage(server, port, message);
+	private static String getNewChunkNum(String prevChunkNum) {
+		int num = Integer.valueOf(prevChunkNum.substring(prevChunkNum.length() - 1));
+		num = num + 1;
+		return GFSReferences.CHUNK_PREFIX + num;
 	}
 
-	private static void createBeforeAppend(String filename, MetaImpl mimpl) {
+	private static List<String> getLastChunkDetails(String filename) {
+		Logger.info("Getting last chunk servers for APPEND at file:" + filename);
+		List<String> result = new ArrayList<String>();
+		if (MetaHelperHeartbeat.metaMap.containsRow(filename)) {
+			Map<String, List<String>> map = MetaHelperHeartbeat.metaMap.row(filename);
+			int lastchunk = 0;
+			for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+				String chunknum = entry.getKey();
+				String last = chunknum.substring(chunknum.length() - 1);
+				int templast = Integer.valueOf(last);
+				if (templast > lastchunk) {
+					lastchunk = templast;
+					String size = entry.getValue().get(0);
+					String version = entry.getValue().get(1);
+					String chunkservers = entry.getValue().get(2);
+					result.add(size);
+					result.add(version);
+					result.add(chunknum);
+					result.add(chunkservers);
+				}
+			}
+			Logger.info("Last Chunk is:" + result.get(2) + " ,Last Chunk Size:" + result.get(0)
+					+ " ,Last Chunk Version:" + result.get(1) + ", Last Chunk Servers:" + result.get(3));
+		} else {
+			Logger.error("Filename:" + filename + " not found in MetaInfo, returning null");
+		}
+		return result;
+	}
+
+	// sunny day case: data can be appended in the last chunk
+	private static void sendAppendToClient(String filename, String server, String chunknum, String chunkservers,
+			MetaImpl mimpl) {
+		String message = GFSReferences.APPEND + GFSReferences.SEND_SEPARATOR;
+		message += filename + GFSReferences.SEND_SEPARATOR;
+		message += chunknum + GFSReferences.SEND_SEPARATOR;
+		message += chunkservers;
+		int port = Nodes.getPortByHostName(server);
+		Sockets.sendMessage(server, port, message);
+		Logger.info("Sent APPEND to client, message:" + message);
+		mimpl.setAppendSentFlag(true);
+		waitForAppendAck(mimpl);
+
+	}
+
+	private static void waitForAppendAck(MetaImpl mimpl) {
+		while (mimpl.isAppendSentFlag()) {
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		Logger.info("Received APPEND_ACK_META from Client. Removing from queue");
+
+	}
+
+	public static void handleAppendAck(String server, MetaImpl cimpl) {
+		Logger.info("Received APPEND_ACK_META from Client:" + server);
+		cimpl.setAppendSentFlag(false);
+
+	}
+
+	private static String createBeforeAppend(String filename, String newChunkNum, MetaImpl mimpl) {
 		// Logger.info("Received CREATE from " + ci.getHostname());
 		String fileToCreate = filename;// MetaHelperCreate.getFileName(message);
 		List<ChunkServer> chunkServers = MetaHelperCreate.get_3RandomChunkServers();
 		// MetaHelperCreate.initMetaFile(fileToCreate, chunkServers);// TODO
-		MetaHelperCreate.forwardCreationToChunks(chunkServers, fileToCreate, mimpl);
-		MetaHelperCreate.waitForChunkServerAck(mimpl);
+		// MetaHelperCreate.forwardCreationToChunks(chunkServers, fileToCreate, mimpl);
+		forwardNewChunkCreationToChunks(chunkServers, filename, newChunkNum, mimpl);
+		waitForNewChunkServerAck(mimpl);
+		String chunks = "";
+		for (ChunkServer chunk : chunkServers)
+			chunks += chunk + ",";
+		return chunks.substring(0, chunks.length() - 1);
+		// MetaHelperCreate.waitForChunkServerAck(mimpl);
 		// MetaHelperCreate.sendCreateSuccessClient(ci.getHostname(), fileToCreate);
 		// mimpl.deleteFromDeferredQueue();
 	}
 
-	private static void padWithNull(String filename, String chunknum) {// TODO get chunkserver list
+	public static void forwardNewChunkCreationToChunks(List<ChunkServer> chunkServers, String fileName, String chunknum,
+			MetaImpl mimpl) {
+		String message = GFSReferences.CREATE_CHUNK + GFSReferences.SEND_SEPARATOR;
+		message += fileName + GFSReferences.SEND_SEPARATOR;
+		message += GFSReferences.CREATE_CHUNK;
+		mimpl.setCreateSentFlag(true);
+		for (ChunkServer chunk : chunkServers) {
+			Sockets.sendMessage(chunk.getName(), chunk.getPort(), message);
+			mimpl.incCreateSentCounter();
+		}
+	}
+
+	public static void waitForNewChunkServerAck(MetaImpl mimpl) {
+		Logger.info("Waiting for CREATE_CHUNK_ACK from the Chunk Servers");
+		while (mimpl.isCreateSentFlag() && mimpl.getCreateSentCounter() > 0) {
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		Logger.info("Received all CREATE_CHUNK_ACKs.");
+	}
+
+	public static void handleChunkCreateAck(String server, MetaImpl mimpl) {
+		Logger.info("Received CHUNK_CREATE_ACK from " + server + " Reducing the counter.");
+		mimpl.decCreateSentCounter();
+		if (mimpl.getCreateSentCounter() == 0 || mimpl.getCreateSentCounter() < 0) {
+			mimpl.setCreateSentFlag(false);
+			mimpl.setCreateSentCounter(0);
+			Logger.info("Received all CHUNK_CREATE_ACKs");
+		}
+	}
+
+	private static void padWithNull(String filename, String chunknum, String chunkservers, MetaImpl mimpl) {
 		String message = GFSReferences.PAD_NULL + GFSReferences.SEND_SEPARATOR;
 		message += filename + GFSReferences.SEND_SEPARATOR;
 		message += chunknum;
-		// TODO sent to chunk server
-		// increment counter; mimpl.incCreateSentCounter();
+		mimpl.setPadSentFlag(true);
+		String chunks[] = chunkservers.split(",");
+		for (String chunk : chunks) {
+			Sockets.sendMessage(chunk, Nodes.getPortByHostName(chunk), message);
+			mimpl.incCreateSentCounter();
+		}
 	}
 
 	public static void waitForPadAck(MetaImpl mimpl) {
@@ -100,13 +206,25 @@ public class MetaHelperAppend {
 				e.printStackTrace();
 			}
 		}
-		Logger.info("Received all PAD_ACK.");
+		Logger.info("Received all PAD_ACKs.");
+	}
+
+	public static void handlePadAck(String server, MetaImpl mimpl) {
+		Logger.info("Received PAD_ACK from " + server + " Reducing the counter.");
+		mimpl.decPadSentCounter();
+		if (mimpl.getPadSentCounter() == 0 || mimpl.getPadSentCounter() < 0) {
+			mimpl.setPadSentFlag(false);
+			mimpl.setPadSentCounter(0);
+			Logger.info("Received all PAD_ACKs");
+		}
 	}
 
 	private static int compareDataSize(int chunksize, int datasize) {
 		if (chunksize > datasize)
 			return 1;
-		else
+		else if (chunksize == datasize)
 			return 0;
+		else
+			return -1;
 	}
 }

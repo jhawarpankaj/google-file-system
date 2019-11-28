@@ -37,24 +37,33 @@ public class MetaListener extends Thread {
 			String command = Helper.getCommand(received);
 			switch (command) {
 
-				case GFSReferences.HEARTBEAT:
-					lock.lock();
-					String message = Helper.getMessage(received);
-					Logger.debug("Received heartbeat: " + message);
-					JsonObject heartbeatJson = Helper.getParsedHeartBeat(message);
-					Logger.debug("Json Parsed heart beat message: " + heartbeatJson); // TODO
+			case GFSReferences.HEARTBEAT:
+				lock.lock();
+				String message = Helper.getMessage(received);
+				Logger.debug("Received heartbeat: " + message);
+				JsonObject heartbeatJson = Helper.getParsedHeartBeat(message);
+				Logger.debug("Json Parsed heart beat message: " + heartbeatJson); // TODO
 //					Helper.iterateHeartBeat(server, heartbeatJson);
-					MetaHelperHeartbeat.updateHeartBeat(server, heartbeatJson);
-					Logger.debug(MetaHelperHeartbeat.metaMap);
-					lock.unlock();
-					break;
-	
-				case GFSReferences.CREATE_ACK:
-					MetaHelperCreate.handleCreateAck(server, mimpl);
-					break;
-	
-				default:
-					throw new GFSException("Unidentified input: " + command + " received on META server!!");
+				MetaHelperHeartbeat.updateHeartBeat(server, heartbeatJson);
+				Logger.debug(MetaHelperHeartbeat.metaMap);
+				lock.unlock();
+				break;
+
+			case GFSReferences.CREATE_ACK:
+				MetaHelperCreate.handleCreateAck(server, mimpl);
+				break;
+			case GFSReferences.APPEND_ACK_META:
+				MetaHelperAppend.handleAppendAck(server, mimpl);
+				break;
+			case GFSReferences.PAD_NULL_ACK:
+				MetaHelperAppend.handlePadAck(server, mimpl);
+				break;
+			case GFSReferences.CREATE_CHUNK_ACK:
+				MetaHelperAppend.handleChunkCreateAck(server, mimpl);
+				break;
+
+			default:
+				throw new GFSException("Unidentified input: " + command + " received on META server!!");
 			}
 
 		} catch (Exception e) {

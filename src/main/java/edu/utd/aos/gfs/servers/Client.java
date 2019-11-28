@@ -20,6 +20,7 @@ public class Client {
 	public static void start() throws GFSException, IOException {
 		Logger.info("Starting client server sockets for all external requests.");
 		ServerSocket serverSocket = null;
+		ClientImpl cimpl = new ClientImpl();
 		try {
 			serverSocket = new ServerSocket(LocalHost.getPort());
 			while (true) {
@@ -27,7 +28,7 @@ public class Client {
 				receiverSocket = serverSocket.accept();
 				DataInputStream dis = new DataInputStream(receiverSocket.getInputStream());
 				DataOutputStream dos = new DataOutputStream(receiverSocket.getOutputStream());
-				Thread t = new ClientListener(receiverSocket, dis, dos, serverSocket);
+				Thread t = new ClientListener(receiverSocket, dis, dos, serverSocket, cimpl);
 				t.start();
 			}
 		} catch (Exception e) {
@@ -45,6 +46,5 @@ public class Client {
 			input = input + GFSReferences.SEND_SEPARATOR + requestTS;
 			Sockets.sendMessage(LocalHost.getName(), LocalHost.getPort(), input);
 		}
-
 	}
 }
