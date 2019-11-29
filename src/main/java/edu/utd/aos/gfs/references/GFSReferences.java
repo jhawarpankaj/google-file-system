@@ -159,6 +159,21 @@ public class GFSReferences {
 	public static final String APPEND_ACK_META = "APPEND_ACK_META";
 
 	/**
+	 * RECOVER post failure.
+	 */
+	public static final String RECOVER = "RECOVER";
+
+	/**
+	 * Chunk server to respond with latest data.
+	 */
+	public static final String SEND_LATEST_DATA = "SEND_LATEST_DATA";
+
+	/**
+	 * To receive latest data.
+	 */
+	public static final String RECEIVE_LATEST_DATA = "RECEIVE_LATEST_DATA";
+
+	/**
 	 * Private constructor for utility class.
 	 */
 

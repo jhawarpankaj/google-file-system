@@ -38,45 +38,54 @@ public class CommonTests {
 		String filename = "/home/pankaj/Desktop/UTD-Semesters/baljeet.txt";
 		
 		
-		File file = new File(filename);	
+//		byte [] bytes = ByteBuffer.allocate(4).putInt(0).array();		
+		FileOutputStream out = new FileOutputStream(filename);
+		char c = '1';
+//		Integer a = 0;
+		byte b = (byte) c;
+		out.write(b);		 
+		out.close();
 		
-		File filePad = new File(filename);
-		byte[] bArrayPad = new byte[(int) filePad.length()];
-		FileInputStream fisPad = new FileInputStream(filePad);
-		fisPad.read(bArrayPad);
 		
-		byte[] writeArray = new byte[4096];
-		int i = 0;
-		for(; i < bArrayPad.length; i++) {
-			writeArray[i] = bArrayPad[i];
-		}
-		char c = '\0';
-		for(; i < 4096 - bArrayPad.length; i++) {
-			writeArray[i] = (byte) c;
-		}
-		String filename2 = "/home/pankaj/Desktop/UTD-Semesters/baljeet2.txt";
+//		File file = new File(filename);	
+//		
+//		File filePad = new File(filename);
+//		byte[] bArrayPad = new byte[(int) filePad.length()];
+//		FileInputStream fisPad = new FileInputStream(filePad);
+//		fisPad.read(bArrayPad);
+//		
+//		byte[] writeArray = new byte[4096];
+//		int i = 0;
+//		for(; i < bArrayPad.length; i++) {
+//			writeArray[i] = bArrayPad[i];
+//		}
+//		char c = '\0';
+//		for(; i < 4096 - bArrayPad.length; i++) {
+//			writeArray[i] = (byte) c;
+//		}
+//		String filename2 = "/home/pankaj/Desktop/UTD-Semesters/baljeet2.txt";
+//		
+//		OutputStream os = new FileOutputStream(filename2); 
+//		
+//		os.write(writeArray);
+//		os.close();
+//		
+//		File fileR = new File(filename2);
+//		System.out.println(fileR.length());
+//		byte[] bArray = new byte[(int) fileR.length()];
+//		FileInputStream fis = new FileInputStream(fileR);
+//		fis.read(bArray);
+//		fis.close();
+//		
+//		FileUtils.writeByteArrayToFile(file, writeArray);
+//		
+//		String content = "";
+//		for (int k = 1; k < bArray.length; k++) {
+//			content = content + (char) bArray[k];
+//		}	
+//		System.out.println(content);
 		
-		OutputStream os = new FileOutputStream(filename2); 
-		
-		os.write(writeArray);
-		os.close();
-		
-		File fileR = new File(filename2);
-		System.out.println(fileR.length());
-		byte[] bArray = new byte[(int) fileR.length()];
-		FileInputStream fis = new FileInputStream(fileR);
-		fis.read(bArray);
-		fis.close();
-		
-		FileUtils.writeByteArrayToFile(file, writeArray);
-		
-		String content = "";
-		for (int k = 1; k < bArray.length; k++) {
-			content = content + (char) bArray[k];
-		}	
-		System.out.println(content);
-		
-		fisPad.close();
+//		fisPad.close();
 //		System.out.println(file.canRead());
 //		System.out.println(file.getTotalSpace());
 //		
