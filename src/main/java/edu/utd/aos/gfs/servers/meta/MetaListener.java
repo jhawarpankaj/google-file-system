@@ -68,6 +68,7 @@ public class MetaListener extends Thread {
 
 		} catch (Exception e) {
 			Logger.error("Error while performing client request: " + e);
+			e.printStackTrace();
 		}
 	}
 }

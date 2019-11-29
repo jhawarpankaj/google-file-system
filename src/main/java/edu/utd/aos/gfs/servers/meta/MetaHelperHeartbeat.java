@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.tinylog.Logger;
-
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.gson.JsonArray;
@@ -50,8 +48,9 @@ public class MetaHelperHeartbeat {
 	 * @param heartbeatJson Input heartbeat in Json format.
 	 */
 	public static void updateHeartBeat(String server, JsonObject heartbeatJson) {
-		Logger.debug("Received heartbeat: " + heartbeatJson.toString() + ", from server: " + server);
-		Logger.debug("Current meta map: " + metaMap);
+		// Logger.debug("Received heartbeat: " + heartbeatJson.toString() + ", from
+		// server: " + server);
+		// Logger.debug("Current meta map: " + metaMap);
 		for (Map.Entry<String, JsonElement> jObj : heartbeatJson.entrySet()) {
 			String fileName = jObj.getKey();
 			JsonObject chunkjObj = jObj.getValue().getAsJsonObject();
@@ -97,7 +96,7 @@ public class MetaHelperHeartbeat {
 				}
 			}
 		}
-		Logger.debug("Updated meta map: " + metaMap);
+		// Logger.debug("Updated meta map: " + metaMap);
 	}
 
 	private static List<String> getListFromJsonArray(JsonArray chunkSizeAndVersion) {

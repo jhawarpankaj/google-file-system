@@ -70,7 +70,8 @@ public class Sockets {
 			out = new DataOutputStream(socket.getOutputStream());
 			out.writeUTF(message);
 			socket.close();
-			Logger.info("Sent " + message + " message to node: " + name);
+			if (message != null && message.length() < 200)
+				Logger.info("Sent " + message + " message to node: " + name);
 		} catch (Exception e) {
 			Logger.error("Error while sending " + message + " message to node: " + name);
 			Logger.debug(e.getMessage());

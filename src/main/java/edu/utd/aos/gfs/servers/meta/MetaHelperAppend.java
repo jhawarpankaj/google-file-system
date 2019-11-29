@@ -48,9 +48,11 @@ public class MetaHelperAppend {
 			Logger.info("Happy Case: Data can be appended to the last chunk");
 			sendAppendToClient(filename, server, lastChunk.get(2), lastChunk.get(3), mimpl, datasize);
 		} else {
+			Logger.info("New Chunk Needs to be created");
 			padWithNull(filename, lastChunk.get(2), lastChunk.get(3), mimpl);
 			waitForPadAck(mimpl);
 			String newChunkNum = getNewChunkNum(lastChunk.get(2));
+			Logger.info("Created new Chunk Number:" + newChunkNum);
 			String chunkservers = createBeforeAppend(filename, newChunkNum, mimpl);
 			sendAppendToClient(filename, server, newChunkNum, chunkservers, mimpl, datasize);
 		}
@@ -128,6 +130,7 @@ public class MetaHelperAppend {
 	}
 
 	private static String createBeforeAppend(String filename, String newChunkNum, MetaImpl mimpl) {
+		Logger.info("Asking Random 3 Chunks to create new chunk" + "," + filename + ":" + newChunkNum);
 		String fileToCreate = filename;
 		List<ChunkServer> chunkServers = MetaHelperCreate.get_3RandomChunkServers();
 		forwardNewChunkCreationToChunks(chunkServers, filename, newChunkNum, mimpl);
@@ -135,19 +138,22 @@ public class MetaHelperAppend {
 		String chunks = "";
 		for (ChunkServer chunk : chunkServers)
 			chunks += chunk + ",";
+		Logger.info("All chunks have been created, proceeding with Append now");
 		return chunks.substring(0, chunks.length() - 1);
 	}
 
 	public static void forwardNewChunkCreationToChunks(List<ChunkServer> chunkServers, String fileName, String chunknum,
 			MetaImpl mimpl) {
+		Logger.info("Sending CREATE_CHUNK to servers");
 		String message = GFSReferences.CREATE_CHUNK + GFSReferences.SEND_SEPARATOR;
 		message += fileName + GFSReferences.SEND_SEPARATOR;
-		message += GFSReferences.CREATE_CHUNK;
+		message += chunknum;
 		mimpl.setCreateSentFlag(true);
 		for (ChunkServer chunk : chunkServers) {
 			Sockets.sendMessage(chunk.getName(), chunk.getPort(), message);
 			mimpl.incCreateSentCounter();
 		}
+		Logger.info("Send All CREATE_CHUNK to servers");
 	}
 
 	public static void waitForNewChunkServerAck(MetaImpl mimpl) {
@@ -173,6 +179,7 @@ public class MetaHelperAppend {
 	}
 
 	private static void padWithNull(String filename, String chunknum, String chunkservers, MetaImpl mimpl) {
+		Logger.info("Asking chunk servers to PAD_NULL");
 		String message = GFSReferences.PAD_NULL + GFSReferences.SEND_SEPARATOR;
 		message += filename + GFSReferences.SEND_SEPARATOR;
 		message += chunknum;
@@ -182,6 +189,7 @@ public class MetaHelperAppend {
 			Sockets.sendMessage(chunk, Nodes.getPortByHostName(chunk), message);
 			mimpl.incCreateSentCounter();
 		}
+		Logger.info("Sent all ChunkServers PAD_NULL");
 	}
 
 	public static void waitForPadAck(MetaImpl mimpl) {
