@@ -118,10 +118,10 @@ public class ClientHelper {
 
 	public static void handleCommitAck(String received, String server, ClientImpl cimpl) {
 		Logger.info("Received COMMIT_ACK from " + server + " Reducing the counter.");
-		cimpl.decAppendSentCounter();
-		if (cimpl.getAppendSentCounter() == 0 || cimpl.getAppendSentCounter() < 0) {
-			cimpl.setAppendSentFlag(false);
-			cimpl.setAppendSentCounter(0);
+		cimpl.decCommitSentCounter();
+		if (cimpl.getCommitSentCounter() == 0 || cimpl.getCommitSentCounter() < 0) {
+			cimpl.setCommitSendFlag(false);
+			cimpl.setCommitSentCounter(0);
 			Logger.info("Received all COMMIT_ACK.");
 		}
 	}
@@ -136,18 +136,18 @@ public class ClientHelper {
 		String commit = GFSReferences.COMMIT + GFSReferences.SEND_SEPARATOR;
 		commit += filename + GFSReferences.SEND_SEPARATOR;
 		commit += chunknum;
-		cimpl.setAppendSentFlag(true);
+		cimpl.setCommitSendFlag(true);
 		for (String chunkserver : chunkservers) {
 			int port = Nodes.getPortByHostName(chunkserver);
 			Sockets.sendMessage(chunkserver, port, commit);
-			cimpl.incAppendSentCounter();
+			cimpl.incCommitSentCounter();
 		}
 		Logger.info("Finished sending COMMIT to all chunks");
 	}
 
 	public static void waitForCommitAck(ClientImpl cimpl) {
 		Logger.info("Waiting for COMMIT_ACK from the Chunk Servers");
-		while (cimpl.isAppendSentFlag() && cimpl.getAppendSentCounter() > 0) {
+		while (cimpl.isCommitSendFlag() && cimpl.getCommitSentCounter() > 0) {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {

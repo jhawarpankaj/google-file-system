@@ -71,15 +71,23 @@ public class MetaHelperAppend {
 		if (MetaHelperHeartbeat.metaMap.containsRow(filename)) {
 			Map<String, List<String>> map = MetaHelperHeartbeat.metaMap.row(filename);
 			int lastchunk = 0;
+			Logger.info("lastchunk:" + lastchunk);
 			for (Map.Entry<String, List<String>> entry : map.entrySet()) {
 				String chunknum = entry.getKey();
 				String last = chunknum.substring(chunknum.length() - 1);
+				Logger.info("last:" + last);
 				int templast = Integer.valueOf(last);
+				Logger.info("templast:" + templast);
 				if (templast > lastchunk) {
+					Logger.info("templast>lastchunk");
 					lastchunk = templast;
+					Logger.info("lastchunk:" + lastchunk);
+					Logger.info("last-chunknum:" + GFSReferences.CHUNK_PREFIX + lastchunk);
+					Logger.info("last-chunknum adding:" + chunknum);
 					String size = entry.getValue().get(0);
 					String version = entry.getValue().get(1);
 					String chunkservers = entry.getValue().get(2);
+					result.clear();
 					result.add(size);
 					result.add(version);
 					result.add(chunknum);
@@ -137,9 +145,10 @@ public class MetaHelperAppend {
 		waitForNewChunkServerAck(mimpl);
 		String chunks = "";
 		for (ChunkServer chunk : chunkServers)
-			chunks += chunk + ",";
-		Logger.info("All chunks have been created, proceeding with Append now");
-		return chunks.substring(0, chunks.length() - 1);
+			chunks += chunk.getName() + ",";
+		chunks = chunks.substring(0, chunks.length() - 1);
+		Logger.info("All chunks have been created, proceeding with Append now, Chunks:" + chunks);
+		return chunks;
 	}
 
 	public static void forwardNewChunkCreationToChunks(List<ChunkServer> chunkServers, String fileName, String chunknum,
@@ -148,17 +157,17 @@ public class MetaHelperAppend {
 		String message = GFSReferences.CREATE_CHUNK + GFSReferences.SEND_SEPARATOR;
 		message += fileName + GFSReferences.SEND_SEPARATOR;
 		message += chunknum;
-		mimpl.setCreateSentFlag(true);
+		mimpl.setCreateChunkSentFlag(true);
 		for (ChunkServer chunk : chunkServers) {
 			Sockets.sendMessage(chunk.getName(), chunk.getPort(), message);
-			mimpl.incCreateSentCounter();
+			mimpl.incCreateChunkSentCounter();
 		}
 		Logger.info("Send All CREATE_CHUNK to servers");
 	}
 
 	public static void waitForNewChunkServerAck(MetaImpl mimpl) {
 		Logger.info("Waiting for CREATE_CHUNK_ACK from the Chunk Servers");
-		while (mimpl.isCreateSentFlag() && mimpl.getCreateSentCounter() > 0) {
+		while (mimpl.isCreateChunkSentFlag() && mimpl.getCreateChunkSentCounter() > 0) {
 			try {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
@@ -170,10 +179,10 @@ public class MetaHelperAppend {
 
 	public static void handleChunkCreateAck(String server, MetaImpl mimpl) {
 		Logger.info("Received CHUNK_CREATE_ACK from " + server + " Reducing the counter.");
-		mimpl.decCreateSentCounter();
-		if (mimpl.getCreateSentCounter() == 0 || mimpl.getCreateSentCounter() < 0) {
-			mimpl.setCreateSentFlag(false);
-			mimpl.setCreateSentCounter(0);
+		mimpl.decCreateChunkSentCounter();
+		if (mimpl.getCreateChunkSentCounter() == 0 || mimpl.getCreateChunkSentCounter() < 0) {
+			mimpl.setCreateChunkSentFlag(false);
+			mimpl.setCreateChunkSentCounter(0);
 			Logger.info("Received all CHUNK_CREATE_ACKs");
 		}
 	}
@@ -187,7 +196,7 @@ public class MetaHelperAppend {
 		String chunks[] = chunkservers.split(",");
 		for (String chunk : chunks) {
 			Sockets.sendMessage(chunk, Nodes.getPortByHostName(chunk), message);
-			mimpl.incCreateSentCounter();
+			mimpl.incPadSentCounter();
 		}
 		Logger.info("Sent all ChunkServers PAD_NULL");
 	}

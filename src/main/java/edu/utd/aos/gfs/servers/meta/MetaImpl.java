@@ -11,17 +11,24 @@ import edu.utd.aos.gfs.utils.Nodes;
 
 public class MetaImpl {
 	ArrayList<MetaQueue> queuedRequest;
+
 	Integer createSentCounter;
 	boolean createSentFlag;
+
 	Integer padSentCounter;
 	boolean padSentFlag;
+
 	boolean appendSentFlag;
+
+	Integer createChunkSentCounter;
+	boolean createChunkSentFlag;
 
 	public MetaImpl() {
 		super();
 		this.queuedRequest = new ArrayList<MetaQueue>();
 		this.createSentCounter = 0;
 		this.padSentCounter = 0;
+		this.createChunkSentCounter = 0;
 	}
 
 	public synchronized ArrayList<MetaQueue> getQueuedRequest() {
@@ -70,6 +77,30 @@ public class MetaImpl {
 
 	public void setAppendSentFlag(boolean appendSentFlag) {
 		this.appendSentFlag = appendSentFlag;
+	}
+
+	public Integer getCreateChunkSentCounter() {
+		return createChunkSentCounter;
+	}
+
+	public synchronized void setCreateChunkSentCounter(Integer createChunkSentCounter) {
+		this.createChunkSentCounter = createChunkSentCounter;
+	}
+
+	public boolean isCreateChunkSentFlag() {
+		return createChunkSentFlag;
+	}
+
+	public synchronized void setCreateChunkSentFlag(boolean createChunkSentFlag) {
+		this.createChunkSentFlag = createChunkSentFlag;
+	}
+
+	public synchronized void decCreateChunkSentCounter() {
+		this.createChunkSentCounter--;
+	}
+
+	public void incCreateChunkSentCounter() {
+		this.createChunkSentCounter++;
 	}
 
 	public synchronized void decCreateSentCounter() {

@@ -45,7 +45,7 @@ public class MetaListener extends Thread {
 				// Logger.debug("Json Parsed heart beat message: " + heartbeatJson); // TODO
 //					dont uncomment Helper.iterateHeartBeat(server, heartbeatJson);
 				MetaHelperHeartbeat.updateHeartBeat(server, heartbeatJson);
-				Logger.debug(MetaHelperHeartbeat.metaMap);
+				// Logger.debug(MetaHelperHeartbeat.metaMap);
 				lock.unlock();
 				break;
 
