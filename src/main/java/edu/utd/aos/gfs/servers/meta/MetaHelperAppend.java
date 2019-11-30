@@ -1,7 +1,5 @@
 package edu.utd.aos.gfs.servers.meta;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,27 +12,6 @@ import edu.utd.aos.gfs.utils.Nodes;
 import edu.utd.aos.gfs.utils.Sockets;
 
 public class MetaHelperAppend {
-
-	public static String getLastChunk(String fileName) {
-		BufferedReader reader;
-		String dir = Nodes.metaServerRootDir();
-		String completeFilePath = dir + fileName;
-		String lastline = "", result = "";
-		try {
-			reader = new BufferedReader(new FileReader(completeFilePath));
-			String line = reader.readLine();
-			while (line != null) {
-				lastline = line;
-				line = reader.readLine();
-			}
-			reader.close();
-			String tokens[] = lastline.split(GFSReferences.MFILE_SEPARATOR);
-			result = tokens[1];
-		} catch (Exception e) {
-			Logger.info(e);
-		}
-		return result;
-	}
 
 	public static void appendOrCreate(String message, String server, MetaImpl mimpl) {
 		Logger.info("Deciding whether to APPEND or CREATE&APPEND");
@@ -71,19 +48,12 @@ public class MetaHelperAppend {
 		if (MetaHelperHeartbeat.metaMap.containsRow(filename)) {
 			Map<String, List<String>> map = MetaHelperHeartbeat.metaMap.row(filename);
 			int lastchunk = 0;
-			Logger.info("lastchunk:" + lastchunk);
 			for (Map.Entry<String, List<String>> entry : map.entrySet()) {
 				String chunknum = entry.getKey();
 				String last = chunknum.substring(chunknum.length() - 1);
-				Logger.info("last:" + last);
 				int templast = Integer.valueOf(last);
-				Logger.info("templast:" + templast);
 				if (templast > lastchunk) {
-					Logger.info("templast>lastchunk");
 					lastchunk = templast;
-					Logger.info("lastchunk:" + lastchunk);
-					Logger.info("last-chunknum:" + GFSReferences.CHUNK_PREFIX + lastchunk);
-					Logger.info("last-chunknum adding:" + chunknum);
 					String size = entry.getValue().get(0);
 					String version = entry.getValue().get(1);
 					String chunkservers = entry.getValue().get(2);
@@ -102,12 +72,12 @@ public class MetaHelperAppend {
 		return result;
 	}
 
-	// sunny day case: data can be appended in the last chunk
 	private static void sendAppendToClient(String filename, String server, String chunknum, String chunkservers,
 			MetaImpl mimpl, int datasize) {
 		String message = GFSReferences.APPEND + GFSReferences.SEND_SEPARATOR;
 		message += filename + GFSReferences.SEND_SEPARATOR;
 		message += chunknum + GFSReferences.SEND_SEPARATOR;
+		chunkservers = chooseAliveServer(chunkservers, mimpl, chunknum, filename);
 		message += chunkservers + GFSReferences.SEND_SEPARATOR;
 		message += datasize;
 		int port = Nodes.getPortByHostName(server);
@@ -116,6 +86,23 @@ public class MetaHelperAppend {
 		mimpl.setAppendSentFlag(true);
 		Logger.info("Waiting for APPEND_ACK_META from client:" + server);
 		waitForAppendAck(mimpl);
+
+	}
+
+	private static String chooseAliveServer(String servers, MetaImpl mimpl, String chunknum, String filename) {
+		String server = "";
+		String serverlist[] = servers.split(",");
+		for (String s : serverlist) {
+			if (!mimpl.getChunkLiveness().containsKey(s)) {
+				server = server + s + ",";
+			}
+		}
+		if (server.isEmpty())
+			Logger.info("All chunk servers " + chunknum + "-" + filename + " are down. Not sending any server");
+		else
+			server = server.substring(0, server.length() - 1);
+		Logger.info("ALIVE servers for append are:" + server);
+		return server;
 
 	}
 
@@ -139,8 +126,7 @@ public class MetaHelperAppend {
 
 	private static String createBeforeAppend(String filename, String newChunkNum, MetaImpl mimpl) {
 		Logger.info("Asking Random 3 Chunks to create new chunk" + "," + filename + ":" + newChunkNum);
-		String fileToCreate = filename;
-		List<ChunkServer> chunkServers = MetaHelperCreate.get_3RandomChunkServers();
+		List<ChunkServer> chunkServers = MetaHelperCreate.get_3RandomChunkServers(mimpl);
 		forwardNewChunkCreationToChunks(chunkServers, filename, newChunkNum, mimpl);
 		waitForNewChunkServerAck(mimpl);
 		String chunks = "";

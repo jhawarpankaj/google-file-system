@@ -262,6 +262,7 @@ public class ChunkHelper {
 
 	/**
 	 * Parse incoming recover message.
+	 * 
 	 * @param received
 	 */
 	public static JsonObject parseRecover(String received) {
@@ -269,33 +270,32 @@ public class ChunkHelper {
 		JsonObject recoverjObj = new Gson().fromJson(jsonResponse, JsonObject.class);
 		return recoverjObj;
 	}
-	
-	// RECOVER||{"file1": {"chunk1":"serverName", "chunk2":"serverName"}, "file2": {"chunk3":"serverName"}}
+
+	// RECOVER||{"file1": {"chunk1":"serverName", "chunk2":"serverName"}, "file2":
+	// {"chunk3":"serverName"}}
 	public static void updateReplicas(JsonObject parseRecover) {
-		for(Entry<String, JsonElement> entry: parseRecover.entrySet()) {
+		for (Entry<String, JsonElement> entry : parseRecover.entrySet()) {
 			String filename = entry.getKey();
 			JsonObject chunksToUpdate = entry.getValue().getAsJsonObject();
-			for(Entry<String, JsonElement> chunks: chunksToUpdate.entrySet()) {
+			for (Entry<String, JsonElement> chunks : chunksToUpdate.entrySet()) {
 				String chunkname = chunks.getKey();
 				String servername = chunks.getValue().getAsString();
 				String prepareSendLatestData = ChunkHelper.prepareSendLatestData(filename, chunkname);
 				Sockets.sendMessage(servername, Nodes.getPortByHostName(servername), prepareSendLatestData);
 			}
-		}		
+		}
 	}
 
 	/**
 	 * Prepare SEND_LATEST_DATA
+	 * 
 	 * @param filename
 	 * @param chunkname
 	 * @return
 	 */
 	private static String prepareSendLatestData(String filename, String chunkname) {
-		return GFSReferences.SEND_LATEST_DATA 
-				+ GFSReferences.SEND_SEPARATOR
-				+ filename
-				+ GFSReferences.SEND_SEPARATOR
-				+ chunkname;		
+		return GFSReferences.SEND_LATEST_DATA + GFSReferences.SEND_SEPARATOR + filename + GFSReferences.SEND_SEPARATOR
+				+ chunkname;
 	}
 
 	/**
@@ -304,34 +304,28 @@ public class ChunkHelper {
 	 * @param received
 	 */
 	public static Map<String, String> parseSendLatestData(String received) {
-		String[] split = received.split(GFSReferences.SEND_SEPARATOR);
+		String[] split = received.split(GFSReferences.REC_SEPARATOR);
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("filename", split[1]);
 		map.put("chunkname", split[2]);
 		return map;
-		
+
 	}
-	
+
 	/**
 	 * Prepare get latest data string.
 	 * 
 	 * @return
 	 */
-	public static String prepareReceiveLatestData(String filename, String chunkname,
-			String content, String version) {
-		return GFSReferences.RECEIVE_LATEST_DATA				
-				+ GFSReferences.SEND_SEPARATOR 
-				+ filename
-				+ GFSReferences.SEND_SEPARATOR
-				+ chunkname
-				+ GFSReferences.SEND_SEPARATOR
-				+ content 
-				+ GFSReferences.SEND_SEPARATOR 
-				+ version;
+	public static String prepareReceiveLatestData(String filename, String chunkname, String content, String version) {
+		return GFSReferences.RECEIVE_LATEST_DATA + GFSReferences.SEND_SEPARATOR + filename
+				+ GFSReferences.SEND_SEPARATOR + chunkname + GFSReferences.SEND_SEPARATOR + content
+				+ GFSReferences.SEND_SEPARATOR + version;
 	}
 
 	/**
 	 * Parse RECEIVE_LATEST_DATA command.
+	 * 
 	 * @param received
 	 * @return
 	 */
@@ -343,6 +337,6 @@ public class ChunkHelper {
 		map.put("content", split[3]);
 		map.put("version", split[4]);
 		return map;
-		
+
 	}
 }

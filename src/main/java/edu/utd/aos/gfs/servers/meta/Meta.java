@@ -9,6 +9,9 @@ import java.net.Socket;
 import org.tinylog.Logger;
 
 import edu.utd.aos.gfs.exception.GFSException;
+import edu.utd.aos.gfs.servers.meta.thread.MetaChunkStateObserver;
+import edu.utd.aos.gfs.servers.meta.thread.MetaListener;
+import edu.utd.aos.gfs.servers.meta.thread.MetaQueueReader;
 import edu.utd.aos.gfs.utils.Helper;
 import edu.utd.aos.gfs.utils.LocalHost;
 
@@ -18,8 +21,10 @@ public class Meta {
 		Logger.info("Starting meta server sockets for all external requests.");
 		ServerSocket serverSocket = null;
 		MetaImpl mimpl = new MetaImpl();
-		Thread queueThread = new MetaQueueListener(mimpl);
+		Thread queueThread = new MetaQueueReader(mimpl);
 		queueThread.start();
+		Thread stateThread = new MetaChunkStateObserver(mimpl);
+		stateThread.start();
 		try {
 			serverSocket = new ServerSocket(LocalHost.getPort());
 
@@ -36,7 +41,7 @@ public class Meta {
 					t.start();
 				}
 			}
-		} catch (Exception e) {			
+		} catch (Exception e) {
 			serverSocket.close();
 			throw new GFSException("Error while receiving message:" + e);
 		}

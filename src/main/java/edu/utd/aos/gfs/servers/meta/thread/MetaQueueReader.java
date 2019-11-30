@@ -1,4 +1,4 @@
-package edu.utd.aos.gfs.servers.meta;
+package edu.utd.aos.gfs.servers.meta.thread;
 
 import java.util.List;
 
@@ -7,18 +7,24 @@ import org.tinylog.Logger;
 import edu.utd.aos.gfs.dto.ChunkServer;
 import edu.utd.aos.gfs.exception.GFSException;
 import edu.utd.aos.gfs.references.GFSReferences;
+import edu.utd.aos.gfs.servers.meta.ClientInfo;
+import edu.utd.aos.gfs.servers.meta.MetaHelperAppend;
+import edu.utd.aos.gfs.servers.meta.MetaHelperCreate;
+import edu.utd.aos.gfs.servers.meta.MetaHelperRead;
+import edu.utd.aos.gfs.servers.meta.MetaImpl;
+import edu.utd.aos.gfs.servers.meta.MetaQueue;
 import edu.utd.aos.gfs.utils.Helper;
 
-public class MetaQueueListener extends Thread {
+public class MetaQueueReader extends Thread {
 	MetaImpl mimpl;
 
-	public MetaQueueListener(MetaImpl mimpl) {
+	public MetaQueueReader(MetaImpl mimpl) {
 		this.mimpl = mimpl;
 	}
 
 	@Override
 	public void run() {
-		Logger.info("Queue Listener Thread Started");
+		Logger.info("Queue-Reader Thread Started");
 		while (true) {
 			try {
 				Thread.sleep(10);
@@ -32,11 +38,10 @@ public class MetaQueueListener extends Thread {
 					String message = chosenRequest.getMessage();
 					String command = Helper.getCommand(message);
 					switch (command) {
-
 					case GFSReferences.CREATE:
 						Logger.info("Received CREATE from " + ci.getHostname());
 						String fileToCreate = MetaHelperCreate.getFileName(message);
-						List<ChunkServer> chunkServers = MetaHelperCreate.get_3RandomChunkServers();
+						List<ChunkServer> chunkServers = MetaHelperCreate.get_3RandomChunkServers(mimpl);
 						MetaHelperCreate.forwardCreationToChunks(chunkServers, fileToCreate, mimpl);
 						MetaHelperCreate.waitForChunkServerAck(mimpl);
 						MetaHelperCreate.sendCreateSuccessClient(ci.getHostname(), fileToCreate);
@@ -50,7 +55,7 @@ public class MetaQueueListener extends Thread {
 						List<String> chunkDetails = MetaHelperRead.computeChunkFromOffset(offset);
 						String chunkServersList = MetaHelperRead.getChunkServersToRead(fileToRead, chunkDetails.get(0));
 						String response = MetaHelperRead.generateReadMsgForClient(fileToRead, chunkDetails,
-								chunkServersList);
+								chunkServersList, mimpl);
 						MetaHelperRead.forwardReadToClient(response, ci.getHostname());
 						mimpl.deleteFromDeferredQueue();
 						break;
@@ -59,7 +64,6 @@ public class MetaQueueListener extends Thread {
 						Logger.info("Received APPEND from " + ci.getHostname());
 						MetaHelperAppend.appendOrCreate(message, ci.getHostname(), mimpl);
 						mimpl.deleteFromDeferredQueue();
-
 						break;
 
 					default:

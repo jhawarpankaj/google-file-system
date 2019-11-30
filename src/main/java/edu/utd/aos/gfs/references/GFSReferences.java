@@ -174,6 +174,16 @@ public class GFSReferences {
 	public static final String RECEIVE_LATEST_DATA = "RECEIVE_LATEST_DATA";
 
 	/**
+	 * Mark chunk as dead.
+	 */
+	public static final String DEAD = "DEAD";
+
+	/**
+	 * Mark chunk as being recovered.
+	 */
+	public static final String IN_RECOVERY = "IN_RECOVERY";
+
+	/**
 	 * Private constructor for utility class.
 	 */
 

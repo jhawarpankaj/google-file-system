@@ -3,6 +3,7 @@ package edu.utd.aos.gfs.servers.meta;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
 import org.tinylog.Logger;
 
@@ -23,12 +24,18 @@ public class MetaImpl {
 	Integer createChunkSentCounter;
 	boolean createChunkSentFlag;
 
+	HashMap<String, Timestamp> chunkTimes;
+	HashMap<String, String> chunkLiveness;
+
 	public MetaImpl() {
 		super();
 		this.queuedRequest = new ArrayList<MetaQueue>();
 		this.createSentCounter = 0;
 		this.padSentCounter = 0;
 		this.createChunkSentCounter = 0;
+		this.chunkLiveness = new HashMap<String, String>();
+		this.chunkTimes = new HashMap<String, Timestamp>();
+
 	}
 
 	public synchronized ArrayList<MetaQueue> getQueuedRequest() {
@@ -160,4 +167,31 @@ public class MetaImpl {
 
 	}
 
+	public HashMap<String, Timestamp> getChunkTimes() {
+		return chunkTimes;
+	}
+
+	public synchronized void setChunkTimes(HashMap<String, Timestamp> chunkTimes) {
+		this.chunkTimes = chunkTimes;
+	}
+
+	public HashMap<String, String> getChunkLiveness() {
+		return chunkLiveness;
+	}
+
+	public synchronized void setChunkLiveness(HashMap<String, String> chunkLiveness) {
+		this.chunkLiveness = chunkLiveness;
+	}
+
+	public synchronized void updateChunkTimes(String server, Timestamp timestamp) {
+		this.chunkTimes.put(server, timestamp);
+	}
+
+	public synchronized void updateChunkLiveness(String server, String state) {
+		this.chunkLiveness.put(server, state);
+	}
+
+	public synchronized void removeDeadChunk(String server) {
+		this.chunkLiveness.remove(server);
+	}
 }

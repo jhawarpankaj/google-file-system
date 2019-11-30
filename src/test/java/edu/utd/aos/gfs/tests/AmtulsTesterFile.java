@@ -7,10 +7,15 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
 import org.tinylog.Logger;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 
 import edu.utd.aos.gfs.dto.ChunkServer;
 import edu.utd.aos.gfs.references.GFSReferences;
@@ -32,7 +37,40 @@ public class AmtulsTesterFile {
 	public static List<List<ChunkServer>> chunkServerCombos = new ArrayList<List<ChunkServer>>();
 
 	public static void main(String[] args) {
-		System.out.println(generateRandomWord(10));
+		// System.out.println(chooseAliveServer("a,b,c,d"));
+		String str = "\"1\"";
+		System.out.println(Integer.valueOf(str));
+	}
+
+	private static void mapToJson() {
+		String jsonString = "";
+		JsonObject main = new JsonObject();
+		Gson gsonBuilder = new GsonBuilder().create();
+		// Convert Java Map into JSON
+		HashMap<String, HashMap<String, String>> map = new HashMap<String, HashMap<String, String>>();
+		HashMap<String, String> one = new HashMap<String, String>();
+		HashMap<String, String> two = new HashMap<String, String>();
+		one.put("chunk1", "dc01");
+		one.put("chunk2", "dc02");
+		two.put("chunk3", "dc03");
+		two.put("chunk4", "dc04");
+
+		map.put("file1", one);
+		map.put("file2", two);
+		String jsonFromJavaMap = gsonBuilder.toJson(map);
+
+		System.out.println(jsonFromJavaMap);
+	}
+
+	private static String chooseAliveServer(String servers) {
+		String server = "";
+		String serverlist[] = servers.split(",");
+		for (String s : serverlist) {
+			server = server + s + ",";
+		}
+
+		server = server.substring(0, server.length() - 1);
+		return server;
 
 	}
 

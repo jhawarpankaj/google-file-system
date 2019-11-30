@@ -1,16 +1,20 @@
-package edu.utd.aos.gfs.servers.meta;
+package edu.utd.aos.gfs.servers.meta.thread;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.tinylog.Logger;
 
-import com.google.gson.JsonObject;
-
 import edu.utd.aos.gfs.exception.GFSException;
 import edu.utd.aos.gfs.references.GFSReferences;
+import edu.utd.aos.gfs.servers.meta.MetaHelperAppend;
+import edu.utd.aos.gfs.servers.meta.MetaHelperCreate;
+import edu.utd.aos.gfs.servers.meta.MetaHelperHeartbeat;
+import edu.utd.aos.gfs.servers.meta.MetaImpl;
 import edu.utd.aos.gfs.utils.Helper;
 
 public class MetaListener extends Thread {
@@ -35,20 +39,11 @@ public class MetaListener extends Thread {
 			String received = message;
 			String server = this.worker.getInetAddress().getHostName();
 			String command = Helper.getCommand(received);
+			Timestamp current = new Timestamp(new Date().getTime());
 			switch (command) {
-
 			case GFSReferences.HEARTBEAT:
-				lock.lock();
-				String message = Helper.getMessage(received);
-				// Logger.debug("Received heartbeat: " + message);
-				JsonObject heartbeatJson = Helper.getParsedHeartBeat(message);
-				// Logger.debug("Json Parsed heart beat message: " + heartbeatJson); // TODO
-//					dont uncomment Helper.iterateHeartBeat(server, heartbeatJson);
-				MetaHelperHeartbeat.updateHeartBeat(server, heartbeatJson);
-				// Logger.debug(MetaHelperHeartbeat.metaMap);
-				lock.unlock();
+				MetaHelperHeartbeat.handleChunkHeartBeat(server, current, mimpl, received, lock);
 				break;
-
 			case GFSReferences.CREATE_ACK:
 				MetaHelperCreate.handleCreateAck(server, mimpl);
 				break;
@@ -61,11 +56,9 @@ public class MetaListener extends Thread {
 			case GFSReferences.CREATE_CHUNK_ACK:
 				MetaHelperAppend.handleChunkCreateAck(server, mimpl);
 				break;
-
 			default:
 				throw new GFSException("Unidentified input: " + command + " received on META server!!");
 			}
-
 		} catch (Exception e) {
 			Logger.error("Error while performing client request: " + e);
 			e.printStackTrace();

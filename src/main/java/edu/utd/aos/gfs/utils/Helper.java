@@ -161,6 +161,12 @@ public class Helper {
 
 	}
 
+	public static int getTimeDifference(Timestamp start, Timestamp end) {
+		long milliseconds = end.getTime() - start.getTime();
+		int seconds = (int) milliseconds / 1000;
+		return seconds;
+	}
+
 	/**
 	 * Private constructor for utility classes.
 	 */

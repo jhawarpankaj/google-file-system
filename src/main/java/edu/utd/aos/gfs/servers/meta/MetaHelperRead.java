@@ -35,15 +35,34 @@ public class MetaHelperRead {
 		}
 	}
 
-	public static String generateReadMsgForClient(String fileName, List<String> chunkDetails, String chunkServers) {
+	public static String generateReadMsgForClient(String fileName, List<String> chunkDetails, String chunkServers,
+			MetaImpl mimpl) {
 		String result = "";
 		result += GFSReferences.READ + GFSReferences.SEND_SEPARATOR;
 		result += fileName + GFSReferences.SEND_SEPARATOR;
 		result += chunkDetails.get(0) + GFSReferences.SEND_SEPARATOR;
 		result += chunkDetails.get(1) + GFSReferences.SEND_SEPARATOR;
+		chunkServers = chooseAliveServer(chunkServers, mimpl, chunkDetails.get(0), fileName);
 		result += chunkServers;
 		Logger.info("Generated READ message to send to client");
 		return result;
+
+	}
+
+	private static String chooseAliveServer(String servers, MetaImpl mimpl, String chunknum, String filename) {
+		String server = "";
+		String serverlist[] = servers.split(",");
+		for (String s : serverlist) {
+			if (!mimpl.getChunkLiveness().containsKey(s)) {
+				server = server + s + ",";
+			}
+		}
+		if (server.isEmpty())
+			Logger.info("All chunk servers " + chunknum + "-" + filename + " are down. Not sending any server");
+		else
+			server = server.substring(0, server.length() - 1);
+		Logger.info("ALIVE servers for READ are:" + server);
+		return server;
 
 	}
 

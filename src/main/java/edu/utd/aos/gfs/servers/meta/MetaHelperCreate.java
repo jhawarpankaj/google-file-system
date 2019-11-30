@@ -1,8 +1,5 @@
 package edu.utd.aos.gfs.servers.meta;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -18,38 +15,46 @@ public class MetaHelperCreate {
 	public static List<List<ChunkServer>> chunkServerCombos = new ArrayList<List<ChunkServer>>();
 	public static Random random = new Random();
 
-	public static void initMetaFile(String fileName, List<ChunkServer> chunkServerNames) {
-		File metafile = null;
-		String completeFilePath = Nodes.metaServerRootDir() + fileName;
-		try {
-			metafile = new File(completeFilePath);
-			if (metafile.createNewFile()) {
-				Logger.info("MetaFile:" + completeFilePath + " created");
-			} else
-				Logger.info("MetaFile:" + completeFilePath + " already exists under ");// TODO
-			String newEntry = GFSReferences.TOTAL_CHUNKS + GFSReferences.MFILE_SEPARATOR + 1;
-			newEntry += GFSReferences.NEW_LINE;
-			BufferedWriter writer = new BufferedWriter(new FileWriter(completeFilePath));
-			newEntry += GFSReferences.CHUNK_PREFIX + 1 + GFSReferences.MFILE_SEPARATOR;
-			for (ChunkServer chunk : chunkServerNames)
-				newEntry += chunk.getName() + GFSReferences.MCHUNK_SEPARATOR;
-			newEntry = newEntry.substring(0, newEntry.length() - 1);
-			writer.write(newEntry);
-			writer.close();
-			Logger.info("MetaFile New Entry Added-" + newEntry);
-		} catch (Exception e) {
-			Logger.info(e);
-		}
-	}
-
-	public static List<ChunkServer> get_3RandomChunkServers() {
-		int element = random.nextInt(10);
-		if (chunkServerCombos != null && chunkServerCombos.size() > 0)
-			return chunkServerCombos.get(element);
-		else {
+	public static List<ChunkServer> get_3RandomChunkServers(MetaImpl mimpl) {
+		boolean next = true;
+		List<ChunkServer> chunks = null;
+		if (chunkServerCombos != null && chunkServerCombos.size() > 0) {
+			while (next) {
+				int element = random.nextInt(10);
+				chunks = chunkServerCombos.get(element);
+				boolean flag = false;
+				for (ChunkServer chunk : chunks) {
+					if (mimpl.getChunkLiveness().containsKey(chunk.getName())) {
+						flag = true;
+						break;
+					}
+				}
+				if (!flag) {
+					next = false;
+				}
+			}
+		} else {
 			populateChunkServerCombos();
-			return chunkServerCombos.get(element);
+			while (next) {
+				int element = random.nextInt(10);
+				chunks = chunkServerCombos.get(element);
+				boolean flag = false;
+				for (ChunkServer chunk : chunks) {
+					if (mimpl.getChunkLiveness().containsKey(chunk.getName())) {
+						flag = true;
+						break;
+					}
+				}
+				if (!flag) {
+					next = false;
+				}
+			}
 		}
+		String chunkservers = "";
+		for (ChunkServer chunk : chunks)
+			chunkservers += chunk + ",";
+		Logger.info("Alive Servers for CREATE:" + chunkservers.substring(0, chunkservers.length() - 1));
+		return chunks;
 	}
 
 	public static void forwardCreationToChunks(List<ChunkServer> chunkServers, String fileName, MetaImpl mimpl) {
