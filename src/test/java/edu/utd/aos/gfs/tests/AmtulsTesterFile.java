@@ -19,6 +19,8 @@ import com.google.gson.JsonObject;
 
 import edu.utd.aos.gfs.dto.ChunkServer;
 import edu.utd.aos.gfs.references.GFSReferences;
+import edu.utd.aos.gfs.servers.ClientHelper;
+import edu.utd.aos.gfs.servers.ClientImpl;
 import edu.utd.aos.gfs.utils.Helper;
 import edu.utd.aos.gfs.utils.Nodes;
 
@@ -38,8 +40,9 @@ public class AmtulsTesterFile {
 
 	public static void main(String[] args) {
 		// System.out.println(chooseAliveServer("a,b,c,d"));
-		String str = "\"1\"";
-		System.out.println(Integer.valueOf(str));
+		// String str = "\"1\"";
+		// System.out.println(Integer.valueOf(str));
+		ClientHelper.handleReadResponse("CONTENT||file||", new ClientImpl());
 	}
 
 	private static void mapToJson() {

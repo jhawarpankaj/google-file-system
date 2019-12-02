@@ -77,9 +77,14 @@ public class ClientHelper {
 		Logger.info("Received READ response from chunk: " + message);
 		cimpl.setReceivedReadResponse(true);
 		String token[] = message.split(GFSReferences.REC_SEPARATOR);
-		String file = token[1];
-		String content = token[2];
-		Logger.info("READ_CONTENT for file:" + file + " is:" + content);
+		if (token.length < 3) {
+			Logger.info("No content available from the file to READ");
+
+		} else {
+			String file = token[1];
+			String content = token[2];
+			Logger.info("READ_CONTENT for file:" + file + " is:" + content);
+		}
 	}
 
 	private static String generateRandomWord(int datasize) {
