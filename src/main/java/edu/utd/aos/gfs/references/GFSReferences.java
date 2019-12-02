@@ -184,6 +184,11 @@ public class GFSReferences {
 	public static final String IN_RECOVERY = "IN_RECOVERY";
 
 	/**
+	 * Timeout for Client-Chunk READ
+	 */
+	public static final int TIMEOUT = 6;
+
+	/**
 	 * Private constructor for utility class.
 	 */
 

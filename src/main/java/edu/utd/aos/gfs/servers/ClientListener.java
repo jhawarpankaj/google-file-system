@@ -45,10 +45,10 @@ public class ClientListener extends Thread {
 				switch (command) {
 				case GFSReferences.READ:
 					Logger.info("Received READ from Meta");
-					ClientHelper.forwardReadToChunk(received);
+					ClientHelper.forwardReadToChunk(received, cimpl);
 					break;
 				case GFSReferences.READ_CONTENT:
-					ClientHelper.handleReadResponse(received);
+					ClientHelper.handleReadResponse(received, cimpl);
 					break;
 				case GFSReferences.APPEND:
 					Logger.info("Received APPEND from Meta");

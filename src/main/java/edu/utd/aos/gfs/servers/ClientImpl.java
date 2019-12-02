@@ -6,11 +6,13 @@ public class ClientImpl {
 	String appendMessage;
 	Integer commitSentCounter;
 	boolean commitSendFlag;
+	boolean receivedReadResponse;
 
 	public ClientImpl() {
 		super();
 		this.appendSentCounter = 0;
 		this.commitSentCounter = 0;
+		this.receivedReadResponse = false;
 	}
 
 	public Integer getAppendSentCounter() {
@@ -51,6 +53,14 @@ public class ClientImpl {
 
 	public synchronized void setCommitSendFlag(boolean commitSendFlag) {
 		this.commitSendFlag = commitSendFlag;
+	}
+
+	public boolean isReceivedReadResponse() {
+		return receivedReadResponse;
+	}
+
+	public synchronized void setReceivedReadResponse(boolean receivedReadResponse) {
+		this.receivedReadResponse = receivedReadResponse;
 	}
 
 	public synchronized void decAppendSentCounter() {

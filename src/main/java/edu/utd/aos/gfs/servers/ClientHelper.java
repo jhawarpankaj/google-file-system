@@ -1,45 +1,85 @@
 package edu.utd.aos.gfs.servers;
 
+import java.sql.Timestamp;
 import java.util.Random;
 
 import org.tinylog.Logger;
 
 import edu.utd.aos.gfs.references.GFSReferences;
+import edu.utd.aos.gfs.utils.Helper;
 import edu.utd.aos.gfs.utils.Nodes;
 import edu.utd.aos.gfs.utils.Sockets;
 
 public class ClientHelper {
 
-	public static void forwardReadToChunk(String received) {
+	public static void forwardReadToChunk(String received, ClientImpl cimpl) {
 		Logger.info("Prepping to forward READ to Chunks");
+		cimpl.setReceivedReadResponse(false);
 		String tokens[] = received.split(GFSReferences.REC_SEPARATOR);
 		String command = tokens[0];
 		String filename = tokens[1];
 		String chunknum = tokens[2];
 		String offset = tokens[3];
 		String chunkservers = tokens[4];
-		String chunkserver = chunkservers.split(",")[0];
+		String chunkserversarr[] = chunkservers.split(",");
+		for (String chunkserver : chunkserversarr) {
+			if (connectToChunkForRead(chunkserver, filename, chunknum, command, offset, cimpl)) {
+				Logger.info("READ Send and Response Successful");
+				return;
+			} else {
+				Logger.info("Trying another server for READ");
+			}
+		}
+		Logger.info("None of the provided servers are available for read");
+		Logger.info("READ FAILED. Try again after sometime");
+		// String chunkserver = chunkservers.split(",")[0];
+		// int chunkserverPort = Nodes.getPortByHostName(chunkserver);
+		// String message = command + GFSReferences.SEND_SEPARATOR;
+		// message += filename + GFSReferences.SEND_SEPARATOR;
+		// message += chunknum + GFSReferences.SEND_SEPARATOR;
+		// message += offset;
+		// Sockets.sendMessage(chunkserver, chunkserverPort, message);
+		// Logger.info("Sending a READ message to " + chunkserver);
+		// Logger.info("Message sent:" + message);
+	}
+
+	private static boolean connectToChunkForRead(String chunkserver, String filename, String chunknum, String command,
+			String offset, ClientImpl cimpl) {
+		int diff = 0;
+		Timestamp start = Helper.getTimestamp();
 		int chunkserverPort = Nodes.getPortByHostName(chunkserver);
 		String message = command + GFSReferences.SEND_SEPARATOR;
 		message += filename + GFSReferences.SEND_SEPARATOR;
 		message += chunknum + GFSReferences.SEND_SEPARATOR;
 		message += offset;
-		Sockets.sendMessage(chunkserver, chunkserverPort, message);
 		Logger.info("Sending a READ message to " + chunkserver);
-		Logger.info("Message sent:" + message);
+		Sockets.sendMessage(chunkserver, chunkserverPort, message);
+		Logger.info("Waiting for READ Response from chunkserver:" + chunkserver);
+		while (diff <= GFSReferences.TIMEOUT && !cimpl.isReceivedReadResponse()) {
+			Timestamp current = Helper.getTimestamp();
+			diff = Helper.getTimeDifference(start, current);
+		}
+		if (cimpl.isReceivedReadResponse()) {
+			Logger.info("Received a READ Response");
+			return true;
+		} else {
+			// Logger.info("ChunkServer:" + chunkserver + " may have gone down, retrying
+			// with another server");
+			return false;
+		}
 	}
 
 	public static void handleCreateResponse(String command) {
 		Logger.info("Received :" + command);
 	}
 
-	public static void handleReadResponse(String message) {
+	public static void handleReadResponse(String message, ClientImpl cimpl) {
 		Logger.info("Received READ response from chunk: " + message);
+		cimpl.setReceivedReadResponse(true);
 		String token[] = message.split(GFSReferences.REC_SEPARATOR);
 		String file = token[1];
 		String content = token[2];
 		Logger.info("READ_CONTENT for file:" + file + " is:" + content);
-		// TODO display to terminal
 	}
 
 	private static String generateRandomWord(int datasize) {
