@@ -226,8 +226,8 @@ public class ChunkHelper {
 		for (; i < b1.length; i++) {
 			result[i] = b1[i];
 		}
-		for (; i < b2.length; i++) {
-			result[i] = b2[i];
+		for (int j = 0; j < b2.length; j++, i++) {
+			result[i] = b2[j];
 		}
 		return result;
 	}

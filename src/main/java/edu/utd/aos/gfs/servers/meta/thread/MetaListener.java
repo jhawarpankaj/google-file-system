@@ -41,23 +41,26 @@ public class MetaListener extends Thread {
 			String command = Helper.getCommand(received);
 			Timestamp current = new Timestamp(new Date().getTime());
 			switch (command) {
-			case GFSReferences.HEARTBEAT:
-				MetaHelperHeartbeat.handleChunkHeartBeat(server, current, mimpl, received, lock);
-				break;
-			case GFSReferences.CREATE_ACK:
-				MetaHelperCreate.handleCreateAck(server, mimpl);
-				break;
-			case GFSReferences.APPEND_ACK_META:
-				MetaHelperAppend.handleAppendAck(server, mimpl);
-				break;
-			case GFSReferences.PAD_NULL_ACK:
-				MetaHelperAppend.handlePadAck(server, mimpl);
-				break;
-			case GFSReferences.CREATE_CHUNK_ACK:
-				MetaHelperAppend.handleChunkCreateAck(server, mimpl);
-				break;
-			default:
-				throw new GFSException("Unidentified input: " + command + " received on META server!!");
+				case GFSReferences.TENDERFEELINGS:
+					System.out.println(MetaHelperHeartbeat.metaMap);
+					break;
+				case GFSReferences.HEARTBEAT:
+					MetaHelperHeartbeat.handleChunkHeartBeat(server, current, mimpl, received, lock);
+					break;
+				case GFSReferences.CREATE_ACK:
+					MetaHelperCreate.handleCreateAck(server, mimpl);
+					break;
+				case GFSReferences.APPEND_ACK_META:
+					MetaHelperAppend.handleAppendAck(server, mimpl);
+					break;
+				case GFSReferences.PAD_NULL_ACK:
+					MetaHelperAppend.handlePadAck(server, mimpl);
+					break;
+				case GFSReferences.CREATE_CHUNK_ACK:
+					MetaHelperAppend.handleChunkCreateAck(server, mimpl);
+					break;
+				default:
+					throw new GFSException("Unidentified input: " + command + " received on META server!!");
 			}
 		} catch (Exception e) {
 			Logger.error("Error while performing client request: " + e);

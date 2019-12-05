@@ -189,6 +189,11 @@ public class GFSReferences {
 	public static final int TIMEOUT = 6;
 
 	/**
+	 * Display meta's current heart beat message.
+	 */
+	public static final String TENDERFEELINGS = "TENDERFEELINGS";
+
+	/**
 	 * Private constructor for utility class.
 	 */
 

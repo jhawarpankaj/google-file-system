@@ -19,6 +19,15 @@ public class Sockets {
 		switch (type) {
 
 		case META:
+			
+			new Thread(() -> {
+				try {
+					Meta.openCommandLineSocket();
+				} catch (IOException e) {
+					Logger.error("Error while initializing command line socket: " + e);
+				}
+			}).start();
+			
 			// Infinite input listener socket.
 			Meta.start();
 			break;
@@ -32,6 +41,13 @@ public class Sockets {
 					Logger.error("Error while initializing command line socket: " + e);
 				}
 			}).start();
+			
+			System.out.println("\nHi! I am a baby Google File System. Please handle me with care.");
+			System.out.println("For now, my creators has just trained me to act on below commands: \n");
+			System.out.println("1. CREATE||filename");
+			System.out.println("2. APPEND||filename||bytes (Mom says no more than 1048 at a time)");
+			System.out.println("3. READ||filename||offset\n");
+			System.out.println("Play time: ");
 
 			// Infinite input listener socket.
 			Client.start();
